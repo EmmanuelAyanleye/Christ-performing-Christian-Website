@@ -1,0 +1,17 @@
+{
+    "name": "emmyspc/grace-fellowship-website",
+    "autoload": {
+        "psr-4": {
+            "Emmyspc\\GraceFellowshipWebsite\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "EmmanuelAyanleye",
+            "email": "ayanleyeemmanuel5@gmail.com"
+        }
+    ],
+    "require": {
+        "phpoffice/phpspreadsheet": "^1.25"
+    }
+}
