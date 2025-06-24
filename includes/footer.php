@@ -3,7 +3,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="100">
-                    <h5 class="">Grace Fellowship Church</h5>
+                    <h5 class="">Christ performing Christian Centre</h5>
                     <p class="mb-3">Building Faith, Strengthening Community, Serving with Love</p>
                     <div class="social-icons">
                         <a href="https://facebook.com" target="_blank" title="Facebook">
@@ -36,36 +36,35 @@
                     <ul class="list-unstyled">
                         <li class="mb-2">
                             <i class="fas fa-map-marker-alt me-2"></i>
-                            123 Faith Avenue, Victoria Island, Lagos, Nigeria
+                            23 Ayofayemi Street, off Princess Abiola Street, Nobex bus stop, Idimu Ikotun Road, Lagos, Nigeria
                         </li>
                         <li class="mb-2">
                             <i class="fas fa-phone me-2"></i>
-                            +234 801 234 5678
+                            +234 916 661 6862
                         </li>
                         <li class="mb-2">
                             <i class="fas fa-envelope me-2"></i>
-                            info@gracefellowshipchurch.org
+                            christperformingcentre@gmail.com
                         </li>
                         <li class="mb-2">
                             <i class="fab fa-whatsapp me-2"></i>
-                            +234 802 345 6789
+                            +234 916 664 8407
                         </li>
                     </ul>
                 </div>
                 <div class="col-lg-3 col-md-12 mb-4" data-aos="fade-up" data-aos-delay="400">
                     <h5>Service Times</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-2">Sunday Worship: 9:00 AM & 11:30 AM</li>
-                        <li class="mb-2">Wednesday Bible Study: 7:00 PM</li>
-                        <li class="mb-2">Friday Night Prayer: 8:00 PM</li>
-                        <li class="mb-2">Youth Service: Saturday 5:00 PM</li>
+                        <li class="mb-2">Sunday Worship: 8:00 AM</li>
+                        <li class="mb-2">Thursday Midweek Service: 6:00 PM</li>
+                        <li class="mb-2">1st Day of the Month: Hour of Praise 6:00 PM</li>
                     </ul>
                 </div>
             </div>
             <hr class="my-4">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <p class="mb-0">&copy; <?php echo date('Y'); ?> Grace Fellowship Church. All rights reserved.</p>
+                    <p class="mb-0">&copy; <?php echo date('Y'); ?> Christ performing Christian Centre. All rights reserved.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <span>Developed by </span><a href="https://www.emmanuelayanleye.com.ng" class="me-3">Emmanuel Ayanleye</a>

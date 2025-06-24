@@ -1,11 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/config.php';
-
-function get_youtube_id($url) {
-    preg_match("/(?:youtube\.com.*(?:\\?|&)v=|youtu\.be\/)([^&]+)/", $url, $matches);
-    return $matches[1] ?? '';
-}
-
+$current_page = 'sermons'; 
 $search_term = $_GET['search'] ?? '';
 $filter_series = $_GET['series'] ?? '';
 $sort_by = $_GET['sort'] ?? 'recent';
@@ -36,7 +31,7 @@ if ($sort_by === 'popular') {
 }
 
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$per_page = 6;
+$per_page = 12; // Changed from 6 to 12
 $offset = ($page - 1) * $per_page;
 
 $total_sermons_sql = "SELECT COUNT(*) FROM sermons" . $where_sql;
@@ -47,25 +42,30 @@ $total_pages = ceil($total_sermons / $per_page);
 
 $sermons_sql = "SELECT * FROM sermons " . $where_sql . " " . $order_by_sql . " LIMIT :offset, :per_page";
 $sermons_stmt = $conn->prepare($sermons_sql);
-foreach ($params as $key => &$val) {
-    $sermons_stmt->bindParam($key, $val);
+
+// Bind the WHERE clause parameters from the $params array
+foreach ($params as $key => $val) {
+    $sermons_stmt->bindValue($key, $val);
 }
-$sermons_stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
-$sermons_stmt->bindParam(':per_page', $per_page, PDO::PARAM_INT);
-$sermons_stmt->execute();
-$sermons = $sermons_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Manually bind the LIMIT parameters as integers, which is required for LIMIT clauses.
+$sermons_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$sermons_stmt->bindValue(':per_page', $per_page, PDO::PARAM_INT);
+
+$sermons_stmt->execute(); // Execute the statement after binding all parameters
+$sermons = $sermons_stmt->fetchAll(PDO::FETCH_ASSOC); 
 
 $all_series_sql = "SELECT DISTINCT series FROM sermons WHERE series IS NOT NULL AND series != '' ORDER BY series ASC";
 $all_series = $conn->query($all_series_sql)->fetchAll(PDO::FETCH_ASSOC);
 
 $page_title = "Sermons";
-$page_description = "Watch and listen to inspiring sermons from Grace Fellowship Church. Search our sermon library and grow in your faith.";
+$page_description = "Watch and listen to inspiring sermons from Christ performing Christian Centre. Search our sermon library and grow in your faith.";
 include '../includes/header.php';
 ?>
 <style>
         :root {
-            --primary-color: #1e3a8a;
-            --secondary-color: #fbbf24;
+            --primary-color: #0b2067;
+            --secondary-color: #f2db37;
             --accent-color: #059669;
             --text-dark: #1f2937;
             --text-light: #6b7280;
@@ -290,7 +290,7 @@ include '../includes/header.php';
         }
 
         .footer a:hover {
-            color: var(--secondary-color);
+            color:rgb(255, 255, 255);
         }
 
         .social-icons a {
@@ -340,7 +340,7 @@ include '../includes/header.php';
     <div class="container">
         <div class="filter-buttons text-center" data-aos="fade-up">
             <a href="sermons.php" class="btn filter-btn <?php echo empty($_GET['sort']) && empty($_GET['series']) ? 'active' : ''; ?>">All Sermons</a>
-            <a href="sermons.php?sort=recent" class="btn filter-btn <?php echo $sort_by === 'recent' ? 'active' : ''; ?>">Recent</a>
+            <!-- Removed "Recent" filter button as it's redundant with default sort by date DESC -->
             <a href="sermons.php?sort=popular" class="btn filter-btn <?php echo $sort_by === 'popular' ? 'active' : ''; ?>">Popular</a>
             <?php foreach ($all_series as $series_item): ?>
                 <a href="sermons.php?series=<?php echo urlencode($series_item['series']); ?>" class="btn filter-btn <?php echo $filter_series === $series_item['series'] ? 'active' : ''; ?>">
@@ -361,7 +361,8 @@ include '../includes/header.php';
                 <?php foreach ($sermons as $sermon): ?>
                     <?php
                         $youtube_id = get_youtube_id($sermon['youtube_url']);
-                        $thumbnail = $sermon['thumbnail_url'] ?: "https://img.youtube.com/vi/$youtube_id/mqdefault.jpg";
+                        $thumbnail = $sermon['thumbnail_url'] 
+    ?: ($youtube_id ? "https://img.youtube.com/vi/$youtube_id/mqdefault.jpg" : 'assets/img/default-thumbnail.jpg');
                     ?>
                     <li class="list-group-item d-flex justify-content-between align-items-start flex-wrap mb-2 p-3">
                         <div class="d-flex align-items-center">

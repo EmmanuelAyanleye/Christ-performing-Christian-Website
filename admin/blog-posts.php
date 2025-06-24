@@ -71,11 +71,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_post'])) {
     }
 }
 
-$stmt = $pdo->query("SELECT blog_posts.*, users.full_name as author_name
-                     FROM blog_posts
-                     JOIN users ON blog_posts.author_id = users.id
-                     ORDER BY created_at DESC");
+// Get filter values from query parameters
+$status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
+$author_filter = isset($_GET['author']) ? (int)$_GET['author'] : 0;
+$category_filter = isset($_GET['category']) ? $_GET['category'] : 'all';
+
+// Build the base query
+$query = "SELECT blog_posts.*, users.full_name as author_name
+          FROM blog_posts
+          JOIN users ON blog_posts.author_id = users.id";
+
+// Add WHERE conditions based on filters
+$where = [];
+$params = [];
+
+// Status filter
+if ($status_filter !== 'all') {
+    $where[] = "blog_posts.status = ?";
+    $params[] = $status_filter;
+}
+
+// Author filter
+if ($author_filter > 0) {
+    $where[] = "blog_posts.author_id = ?";
+    $params[] = $author_filter;
+}
+
+// Category filter
+if ($category_filter !== 'all') {
+    $where[] = "blog_posts.category = ?";
+    $params[] = $category_filter;
+}
+
+// Combine WHERE conditions
+if (!empty($where)) {
+    $query .= " WHERE " . implode(" AND ", $where);
+}
+
+// Add sorting
+$query .= " ORDER BY blog_posts.created_at DESC";
+
+// Prepare and execute the query
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
 $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Get all authors for filter dropdown
+$authors = $pdo->query("SELECT id, full_name FROM users ORDER BY full_name")->fetchAll(PDO::FETCH_ASSOC);
+
+// Get all categories for filter dropdown
+$categories = $pdo->query("SELECT DISTINCT category FROM blog_posts ORDER BY category")->fetchAll(PDO::FETCH_COLUMN);
 
 $pageTitle = "Manage Blog Posts";
 include __DIR__ . '/partials/header.php';
@@ -91,6 +136,50 @@ include __DIR__ . '/partials/sidebar.php';
     </div>
 
     <?php if (!empty($message)) echo $message; ?>
+
+    <!-- Filter Section -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="all" <?= $status_filter === 'all' ? 'selected' : '' ?>>All Statuses</option>
+                        <option value="published" <?= $status_filter === 'published' ? 'selected' : '' ?>>Published</option>
+                        <option value="draft" <?= $status_filter === 'draft' ? 'selected' : '' ?>>Draft</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Author</label>
+                    <select name="author" class="form-select">
+                        <option value="0" <?= $author_filter === 0 ? 'selected' : '' ?>>All Authors</option>
+                        <?php foreach ($authors as $author): ?>
+                            <option value="<?= $author['id'] ?>" <?= $author_filter === $author['id'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($author['full_name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Category</label>
+                    <select name="category" class="form-select">
+                        <option value="all" <?= $category_filter === 'all' ? 'selected' : '' ?>>All Categories</option>
+                        <?php foreach ($categories as $category): ?>
+                            <option value="<?= htmlspecialchars($category) ?>" <?= $category_filter === $category ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($category) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <div class="d-flex gap-2 w-100">
+                        <button type="submit" class="btn btn-primary flex-grow-1">Apply Filters</button>
+                        <a href="?" class="btn btn-outline-secondary">Reset</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <div class="card mt-4">
         <div class="card-body">
@@ -108,27 +197,33 @@ include __DIR__ . '/partials/sidebar.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($posts as $post): ?>
+                        <?php if (empty($posts)): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($post['title']); ?></td>
-                                <td><?php echo htmlspecialchars($post['category']); ?></td>
-                                <td><?php echo htmlspecialchars($post['author_name']); ?></td>
-                                <td><span class="badge bg-<?php echo $post['status'] === 'published' ? 'success' : 'secondary'; ?>"><?php echo ucfirst($post['status']); ?></span></td>
-                                <td><?php echo date('M j, Y', strtotime($post['created_at'])); ?></td>
-                                <td><?php echo (int)$post['view_count']; ?></td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary" onclick='editPost(<?php echo json_encode($post); ?>)'>
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <form method="POST" style="display:inline-block;" onsubmit="return confirm('Delete this post?');">
-                                        <input type="hidden" name="delete_post_id" value="<?php echo $post['id']; ?>">
-                                        <button class="btn btn-sm btn-danger" type="submit">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
+                                <td colspan="7" class="text-center">No posts found matching your criteria</td>
                             </tr>
-                        <?php endforeach; ?>
+                        <?php else: ?>
+                            <?php foreach ($posts as $post): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($post['title']); ?></td>
+                                    <td><?php echo htmlspecialchars($post['category']); ?></td>
+                                    <td><?php echo htmlspecialchars($post['author_name']); ?></td>
+                                    <td><span class="badge bg-<?php echo $post['status'] === 'published' ? 'success' : 'secondary'; ?>"><?php echo ucfirst($post['status']); ?></span></td>
+                                    <td><?php echo date('M j, Y', strtotime($post['created_at'])); ?></td>
+                                    <td><?php echo (int)$post['view_count']; ?></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" onclick='editPost(<?php echo json_encode($post); ?>)'>
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <form method="POST" style="display:inline-block;" onsubmit="return confirm('Delete this post?');">
+                                            <input type="hidden" name="delete_post_id" value="<?php echo $post['id']; ?>">
+                                            <button class="btn btn-sm btn-danger" type="submit">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>

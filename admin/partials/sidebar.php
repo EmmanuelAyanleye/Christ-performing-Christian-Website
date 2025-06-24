@@ -1,6 +1,7 @@
 <nav class="sidebar">
     <div class="sidebar-header">
-        <h4><i class="fas fa-church"></i> Grace Fellowship</h4>
+        <img src="<?php echo BASE_URL; ?>/images/church_logo.png" alt="Church Logo" width="40" height="40">
+        <h4>Christ performing Christian Centre</h4>
         <p>Admin Panel</p>
     </div>
     
@@ -13,6 +14,9 @@
         </li>
         <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'blog-posts.php' ? 'active' : ''; ?>">
             <a href="blog-posts.php"><i class="fas fa-blog"></i> Blog Posts</a>
+        </li>
+        <li>
+            <a href="<?php echo BASE_URL; ?>/admin/blog-comments.php" class="<?php echo ($current_page == 'blog-comments') ? 'active' : ''; ?>"><i class="fas fa-comments"></i> Blog Comments</a>
         </li>
         <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'sermons.php' ? 'active' : ''; ?>">
             <a href="sermons.php"><i class="fas fa-microphone"></i> Sermons</a>

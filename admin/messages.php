@@ -1,5 +1,10 @@
 <?php
 require_once __DIR__ . '/../includes/config.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 require_once __DIR__ . '/partials/session_auth.php';
 
 $pageTitle = "Contact Messages";
@@ -30,12 +35,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$id]);
         $message_feedback = '<div class="alert alert-success">Message deleted successfully.</div>';
     }
-    // Mark as Replied (from modal)
-    elseif (isset($_POST['mark_as_replied'])) {
+    // Send Reply
+    elseif (isset($_POST['send_reply'])) {
         $id = (int)$_POST['id'];
-        $stmt = $pdo->prepare("UPDATE messages SET status = 'replied' WHERE id = ?");
-        $stmt->execute([$id]);
-        $message_feedback = '<div class="alert alert-info">Message marked as replied. <strong>Note:</strong> An actual email was not sent.</div>';
+        $to_email = filter_var($_POST['to_email'], FILTER_VALIDATE_EMAIL);
+        $subject = sanitize_input($_POST['subject']);
+        $reply_body = $_POST['reply_body']; // Allow HTML for better formatting
+
+        if (!$to_email) {
+            $message_feedback = '<div class="alert alert-danger">Invalid recipient email address.</div>';
+        } else {
+            $mail = new PHPMailer(true);
+            try {
+                //Server settings
+                $mail->isSMTP();
+                $mail->Host       = SMTP_HOST;
+                $mail->SMTPAuth   = true;
+                $mail->Username   = SMTP_USER;
+                $mail->Password   = SMTP_PASS;
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->Port       = SMTP_PORT;
+
+                //Recipients
+                $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
+                $mail->addAddress($to_email);
+                $mail->addReplyTo(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
+
+                //Content
+                $mail->isHTML(true);
+                $mail->Subject = $subject;
+                $mail->Body    = nl2br(htmlspecialchars($reply_body));
+                $mail->AltBody = strip_tags($reply_body);
+
+                $mail->send();
+
+                // Update message status in DB
+                $stmt = $pdo->prepare("UPDATE messages SET status = 'replied' WHERE id = ?");
+                $stmt->execute([$id]);
+
+                $message_feedback = '<div class="alert alert-success">Reply sent successfully and message marked as replied.</div>';
+            } catch (Exception $e) {
+                $message_feedback = "<div class='alert alert-danger'>Message could not be sent. Mailer Error: " . htmlspecialchars($mail->ErrorInfo) . "</div>";
+            }
+        }
     }
 }
 
@@ -255,15 +297,21 @@ include __DIR__ . '/partials/header.php';
 <!-- Reply Message Modal -->
 <div class="modal fade" id="replyMessageModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content">
     <form id="replyForm" method="POST" action="messages.php">
-        <input type="hidden" name="id" id="replyId"><input type="hidden" name="mark_as_replied" value="1">
+        <input type="hidden" name="id" id="replyId">
+        <input type="hidden" name="send_reply" value="1">
         <div class="modal-header"><h5 class="modal-title">Reply to Message</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
         <div class="modal-body">
-            <div class="alert alert-info"><strong>Note:</strong> This only marks the message as 'replied' in the system. It does <strong>not</strong> send an actual email.</div>
-            <div class="mb-3"><label class="form-label">To:</label><input type="email" class="form-control" id="replyTo" readonly></div>
-            <div class="mb-3"><label class="form-label">Subject:</label><input type="text" class="form-control" id="replySubject" readonly></div>
-            <div class="mb-3"><label class="form-label">Your Reply (for reference only):</label><textarea class="form-control" id="replyMessage" rows="8" placeholder="Compose your reply here..."></textarea></div>
+            <div class="mb-3">
+                <label class="form-label">To:</label>
+                <input type="email" class="form-control" id="replyTo" name="to_email" readonly>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Subject:</label>
+                <input type="text" class="form-control" id="replySubject" name="subject" required>
+            </div>
+            <div class="mb-3"><label class="form-label">Your Reply:</label><textarea class="form-control" id="replyMessage" name="reply_body" rows="8" required placeholder="Compose your reply here..."></textarea></div>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Mark as Replied</button></div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Send Reply</button></div>
     </form>
 </div></div></div>
 

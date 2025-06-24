@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/config.php'; // Load configuration and database connection
+$current_page = 'gallery'; 
 
 // --- FILTERS, SEARCH, AND PAGINATION ---
 $search_term = $_GET['search'] ?? '';
@@ -15,7 +16,6 @@ $where_clauses = [];
 $params = [];
 
 if (!empty($search_term)) {
-    // Search in title, description, and tags
     $where_clauses[] = "(title LIKE :search OR description LIKE :search OR tags LIKE :search)";
     $params[':search'] = '%' . $search_term . '%';
 }
@@ -57,9 +57,144 @@ $all_categories_sql = "SELECT DISTINCT category FROM gallery WHERE category IS N
 $all_categories = $conn->query($all_categories_sql)->fetchAll(PDO::FETCH_ASSOC);
 
 $page_title = "Photo Gallery";
-$page_description = "Browse through our church gallery. See moments of worship, fellowship, and community life at Grace Fellowship Church.";
+$page_description = "Browse through our church gallery. See moments of worship, fellowship, and community life at Christ performing Christian Centre.";
 include '../includes/header.php';
 ?>
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <div data-aos="fade-up">
+            <h1 class="font-display">Photo Gallery</h1>
+            <p>Moments of worship, fellowship, and community life</p>
+        </div>
+    </div>
+</section>
+
+<!-- Search Section -->
+<section class="search-section">
+    <div class="container">
+        <form action="gallery.php" method="GET" class="search-bar" data-aos="fade-up">
+            <div class="input-group">
+                <input type="text" class="form-control" name="search" id="gallerySearch" placeholder="Search photos by title, event, or tag..." value="<?php echo htmlspecialchars($search_term); ?>">
+                <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Gallery Section -->
+<section class="section-padding">
+    <div class="container">
+        <!-- Filter Buttons -->
+        <div class="filter-buttons text-center" data-aos="fade-up">
+            <a href="gallery.php" class="btn filter-btn <?php echo empty($filter_category) ? 'active' : ''; ?>">All Photos</a>
+            <?php foreach ($all_categories as $cat): ?>
+                <a href="gallery.php?category=<?php echo urlencode($cat['category']); ?>" class="btn filter-btn <?php echo ($filter_category === $cat['category']) ? 'active' : ''; ?>">
+                    <?php echo htmlspecialchars(ucfirst($cat['category'])); ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- Gallery Grid -->
+        <div class="row" id="galleryContainer">
+            <?php if (empty($gallery_items)): ?>
+                <div class="col-12 text-center" data-aos="fade-up">
+                    <h3>No Photos Found</h3>
+                    <p>Your search or filter did not return any results. Please try again.</p>
+                    <a href="gallery.php" class="btn btn-primary mt-3">View Full Gallery</a>
+                </div>
+            <?php else: ?>
+                <?php foreach ($gallery_items as $item): ?>
+                    <?php
+                    // FIXED IMAGE PATH HANDLING
+                    // Get the base URL (defined in your config.php)
+                    $base_url = rtrim(BASE_URL, '/');
+                    
+                    // Process image paths
+                    $image_path = ltrim($item['image_url'], '/');
+                    $thumbnail_path = ltrim($item['thumbnail_url'] ?: $item['image_url'], '/');
+                    
+                    // Create full URLs
+                    $image_url = $base_url . '/' . $image_path;
+                    $thumbnail_url = $base_url . '/' . $thumbnail_path;
+                    ?>
+                    <div class="col-lg-4 col-md-6 mb-4 gallery-photo" data-aos="zoom-in">
+                        <div class="gallery-item" onclick="openModal(
+                            '<?php echo htmlspecialchars($image_url); ?>', 
+                            '<?php echo htmlspecialchars(addslashes($item['title'])); ?>', 
+                            '<?php echo htmlspecialchars(addslashes($item['description'])); ?>', 
+                            '<?php echo date('F j, Y', strtotime($item['event_date'])); ?>'
+                        )">
+                            <img src="<?php echo htmlspecialchars($thumbnail_url); ?>" 
+                                 alt="<?php echo htmlspecialchars($item['title']); ?>"
+                                 onerror="this.onerror=null; this.src='<?php echo $base_url; ?>/assets/images/default-image.jpg';">
+                            <div class="gallery-overlay">
+                                <h5><?php echo htmlspecialchars($item['title']); ?></h5>
+                                <p><?php echo htmlspecialchars(substr($item['description'], 0, 50)); ?>...</p>
+                                <?php if ($item['event_date']): ?>
+                                <div class="gallery-meta">
+                                    <i class="fas fa-calendar me-1"></i><?php echo date('M j, Y', strtotime($item['event_date'])); ?>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+
+        <!-- Pagination -->
+        <?php if ($total_pages > 1): ?>
+        <nav aria-label="Gallery pagination" class="mt-5">
+            <ul class="pagination justify-content-center">
+                <?php
+                $query_params = http_build_query(['search' => $search_term, 'category' => $filter_category]);
+                ?>
+                <li class="page-item <?php echo ($page <= 1) ? 'disabled' : ''; ?>">
+                    <a class="page-link" href="?page=<?php echo $page - 1; ?>&<?php echo $query_params; ?>" aria-label="Previous">&laquo;</a>
+                </li>
+                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                    <li class="page-item <?php echo ($i == $page) ? 'active' : ''; ?>">
+                        <a class="page-link" href="?page=<?php echo $i; ?>&<?php echo $query_params; ?>"><?php echo $i; ?></a>
+                    </li>
+                <?php endfor; ?>
+                <li class="page-item <?php echo ($page >= $total_pages) ? 'disabled' : ''; ?>">
+                    <a class="page-link" href="?page=<?php echo $page + 1; ?>&<?php echo $query_params; ?>" aria-label="Next">&raquo;</a>
+                </li>
+            </ul>
+        </nav>
+        <?php endif; ?>
+    </div>
+</section>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" alt="" class="img-fluid">
+            </div>
+            <div class="modal-footer justify-content-between">
+                <div>
+                    <p id="modalDescription" class="mb-0"></p>
+                    <small id="modalDate" class="text-muted"></small>
+                </div>
+                <a href="#" id="downloadBtn" class="btn btn-primary" download>
+                    <i class="fas fa-download me-2"></i>Download
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php include '../includes/footer.php'; ?>
     <style>
         :root {
             --primary-color: #1e3a8a;
@@ -329,126 +464,6 @@ include '../includes/header.php';
         }
     </style>
 
-<!-- Page Header -->
-<section class="page-header">
-    <div class="container">
-        <div data-aos="fade-up">
-            <h1 class="font-display">Photo Gallery</h1>
-            <p>Moments of worship, fellowship, and community life</p>
-        </div>
-    </div>
-</section>
-
-<!-- Search Section -->
-<section class="search-section">
-    <div class="container">
-        <form action="gallery.php" method="GET" class="search-bar" data-aos="fade-up">
-            <div class="input-group">
-                <input type="text" class="form-control" name="search" id="gallerySearch" placeholder="Search photos by title, event, or tag..." value="<?php echo htmlspecialchars($search_term); ?>">
-                <button class="btn btn-primary" type="submit">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-        </form>
-    </div>
-</section>
-
-<!-- Gallery Section -->
-<section class="section-padding">
-    <div class="container">
-        <!-- Filter Buttons -->
-        <div class="filter-buttons text-center" data-aos="fade-up">
-            <a href="gallery.php" class="btn filter-btn <?php echo empty($filter_category) ? 'active' : ''; ?>">All Photos</a>
-            <?php foreach ($all_categories as $cat): ?>
-                <a href="gallery.php?category=<?php echo urlencode($cat['category']); ?>" class="btn filter-btn <?php echo ($filter_category === $cat['category']) ? 'active' : ''; ?>">
-                    <?php echo htmlspecialchars(ucfirst($cat['category'])); ?>
-                </a>
-            <?php endforeach; ?>
-        </div>
-
-        <!-- Gallery Grid -->
-        <div class="row" id="galleryContainer">
-            <?php if (empty($gallery_items)): ?>
-                <div class="col-12 text-center" data-aos="fade-up">
-                    <h3>No Photos Found</h3>
-                    <p>Your search or filter did not return any results. Please try again.</p>
-                    <a href="gallery.php" class="btn btn-primary mt-3">View Full Gallery</a>
-                </div>
-            <?php else: ?>
-                <?php foreach ($gallery_items as $item): ?>
-                    <div class="col-lg-4 col-md-6 mb-4 gallery-photo" data-aos="zoom-in">
-                        <div class="gallery-item" onclick="openModal(
-                            '<?php echo htmlspecialchars($item['image_url']); ?>', 
-                            '<?php echo htmlspecialchars(addslashes($item['title'])); ?>', 
-                            '<?php echo htmlspecialchars(addslashes($item['description'])); ?>', 
-                            '<?php echo date('F j, Y', strtotime($item['event_date'])); ?>'
-                        )">
-                            <img src="<?php echo htmlspecialchars($item['thumbnail_url'] ?: $item['image_url']); ?>" alt="<?php echo htmlspecialchars($item['title']); ?>">
-                            <div class="gallery-overlay">
-                                <h5><?php echo htmlspecialchars($item['title']); ?></h5>
-                                <p><?php echo htmlspecialchars(substr($item['description'], 0, 50)); ?>...</p>
-                                <?php if ($item['event_date']): ?>
-                                <div class="gallery-meta">
-                                    <i class="fas fa-calendar me-1"></i><?php echo date('M j, Y', strtotime($item['event_date'])); ?>
-                                </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </div>
-
-        <!-- Pagination -->
-        <?php if ($total_pages > 1): ?>
-        <nav aria-label="Gallery pagination" class="mt-5">
-            <ul class="pagination justify-content-center">
-                <?php
-                $query_params = http_build_query(['search' => $search_term, 'category' => $filter_category]);
-                ?>
-                <li class="page-item <?php echo ($page <= 1) ? 'disabled' : ''; ?>">
-                    <a class="page-link" href="?page=<?php echo $page - 1; ?>&<?php echo $query_params; ?>" aria-label="Previous">&laquo;</a>
-                </li>
-                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                    <li class="page-item <?php echo ($i == $page) ? 'active' : ''; ?>">
-                        <a class="page-link" href="?page=<?php echo $i; ?>&<?php echo $query_params; ?>"><?php echo $i; ?></a>
-                    </li>
-                <?php endfor; ?>
-                <li class="page-item <?php echo ($page >= $total_pages) ? 'disabled' : ''; ?>">
-                    <a class="page-link" href="?page=<?php echo $page + 1; ?>&<?php echo $query_params; ?>" aria-label="Next">&raquo;</a>
-                </li>
-            </ul>
-        </nav>
-        <?php endif; ?>
-    </div>
-</section>
-
-<!-- Image Modal -->
-<div class="modal fade" id="imageModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalTitle"></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body text-center">
-                <img id="modalImage" src="" alt="" class="img-fluid">
-            </div>
-            <div class="modal-footer justify-content-between">
-                <div>
-                    <p id="modalDescription" class="mb-0"></p>
-                    <small id="modalDate" class="text-muted"></small>
-                </div>
-                <a href="#" id="downloadBtn" class="btn btn-primary" download>
-                    <i class="fas fa-download me-2"></i>Download
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<?php include '../includes/footer.php'; ?>
-
 <script>
     // Modal functionality
     const modalImage = document.getElementById('modalImage');
@@ -481,7 +496,6 @@ include '../includes/header.php';
             downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Downloading...';
             downloadBtn.disabled = true;
 
-            // Use cors-anywhere proxy for cross-origin images if needed, or ensure images are served with CORS headers
             const response = await fetch(url, { mode: 'cors' });
 
             if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);

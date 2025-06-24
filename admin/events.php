@@ -45,7 +45,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_event'])) {
     }
 }
 
-$events = $pdo->query("SELECT * FROM events ORDER BY start_date DESC")->fetchAll();
+// Get filter values
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
+
+// Build query with filters
+$query = "SELECT * FROM events";
+$where = [];
+$params = [];
+
+// Add search condition
+if (!empty($search)) {
+    $where[] = "(title LIKE ? OR description LIKE ? OR location LIKE ?)";
+    $search_term = "%$search%";
+    $params[] = $search_term;
+    $params[] = $search_term;
+    $params[] = $search_term;
+}
+
+// Add status filter
+if ($status_filter !== 'all') {
+    $now = date('Y-m-d H:i:s');
+    if ($status_filter === 'upcoming') {
+        $where[] = "start_date > ?";
+        $params[] = $now;
+    } elseif ($status_filter === 'past') {
+        $where[] = "start_date <= ?";
+        $params[] = $now;
+    }
+}
+
+// Combine WHERE conditions
+if (!empty($where)) {
+    $query .= " WHERE " . implode(" AND ", $where);
+}
+
+// Add sorting
+$query .= " ORDER BY start_date DESC";
+
+// Prepare and execute the query
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
+$events = $stmt->fetchAll();
 
 include __DIR__ . '/partials/header.php';
 include __DIR__ . '/partials/sidebar.php';
@@ -62,7 +103,31 @@ include __DIR__ . '/partials/sidebar.php';
 
     <?php if ($message) echo $message; ?>
 
-    <div class="card">
+    <!-- Search and Filter Section -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" name="search" placeholder="Search by title, description, or location..." value="<?= htmlspecialchars($search) ?>">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" name="status">
+                        <option value="all" <?= $status_filter === 'all' ? 'selected' : '' ?>>All Events</option>
+                        <option value="upcoming" <?= $status_filter === 'upcoming' ? 'selected' : '' ?>>Upcoming Events</option>
+                        <option value="past" <?= $status_filter === 'past' ? 'selected' : '' ?>>Past Events</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mt-4">
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover">
@@ -76,37 +141,43 @@ include __DIR__ . '/partials/sidebar.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($events as $event): ?>
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <img src="<?php echo BASE_URL . '/' . htmlspecialchars($event['featured_image'] ?: 'assets/images/default-thumbnail.png'); ?>" 
-                                         class="rounded me-2" width="60" height="40" alt="Event Image">
-                                    <strong><?php echo htmlspecialchars($event['title']); ?></strong>
-                                </div>
-                            </td>
-                            <td>
-                                <?php echo format_date($event['start_date'], 'M j, Y'); ?><br>
-                                <small class="text-muted"><?php echo format_date($event['start_date'], 'g:i A'); ?></small>
-                            </td>
-                            <td><?php echo htmlspecialchars($event['location']); ?></td>
-                            <td>
-                                <?php
-                                $now = new DateTime();
-                                $start = new DateTime($event['start_date']);
-                                echo $now > $start ? '<span class="badge bg-secondary">Completed</span>' : '<span class="badge bg-primary">Upcoming</span>';
-                                ?>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary btn-action" title="Edit" onclick='prepareEditModal(<?php echo json_encode($event); ?>)'>
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <a href="?action=delete&id=<?php echo $event['id']; ?>" class="btn btn-sm btn-outline-danger btn-action" title="Delete" onclick="return confirm('Are you sure you want to delete this event?');">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
+                        <?php if (empty($events)): ?>
+                            <tr>
+                                <td colspan="5" class="text-center">No events found matching your criteria</td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($events as $event): ?>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="<?php echo BASE_URL . '/' . htmlspecialchars($event['featured_image'] ?: 'assets/images/default-thumbnail.png'); ?>" 
+                                             class="rounded me-2" width="60" height="40" alt="Event Image">
+                                        <strong><?php echo htmlspecialchars($event['title']); ?></strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <?php echo format_date($event['start_date'], 'M j, Y'); ?><br>
+                                    <small class="text-muted"><?php echo format_date($event['start_date'], 'g:i A'); ?></small>
+                                </td>
+                                <td><?php echo htmlspecialchars($event['location']); ?></td>
+                                <td>
+                                    <?php
+                                    $now = new DateTime();
+                                    $start = new DateTime($event['start_date']);
+                                    echo $now > $start ? '<span class="badge bg-secondary">Completed</span>' : '<span class="badge bg-primary">Upcoming</span>';
+                                    ?>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary btn-action" title="Edit" onclick='prepareEditModal(<?php echo json_encode($event); ?>)'>
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <a href="?action=delete&id=<?php echo $event['id']; ?>" class="btn btn-sm btn-outline-danger btn-action" title="Delete" onclick="return confirm('Are you sure you want to delete this event?');">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>

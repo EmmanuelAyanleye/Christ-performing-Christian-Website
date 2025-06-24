@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo isset($page_title) ? $page_title . ' - ' : ''; ?>Grace Fellowship Church</title>
-    <meta name="description" content="<?php echo isset($page_description) ? $page_description : 'Join Grace Fellowship Church - A vibrant Christian community in Nigeria. Experience worship, grow in faith, and connect with others.'; ?>">
+    <title><?php echo isset($page_title) ? $page_title . ' - ' : ''; ?>Christ performing Christian Centre</title>
+    <meta name="description" content="<?php echo isset($page_description) ? $page_description : 'Join Christ performing Christian Centre - A vibrant Christian community in Nigeria. Experience worship, grow in faith, and connect with others.'; ?>">
+    <link rel="icon" type="image/png" href="../images/church_logo.png">
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -17,8 +18,8 @@
 
     <style>
         :root {
-            --primary-color: #1e3a8a;
-            --secondary-color: #fbbf24;
+            --primary-color: #0b2067;
+            --secondary-color: #f2db37;
             --accent-color: #059669;
             --text-dark: #1f2937;
             --text-light: #6b7280;
@@ -76,6 +77,11 @@
             left: 50%;
             background-color: var(--secondary-color);
             transition: all 0.3s ease;
+        }
+
+        .nav-link.active {
+            color: var(--primary-color) !important;
+            font-weight: 600;
         }
 
         .nav-link:hover::after {

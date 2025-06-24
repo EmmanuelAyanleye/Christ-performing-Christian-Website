@@ -1,13 +1,14 @@
 <?php
 require_once __DIR__ . '/../includes/config.php'; // Ensure this path is correct
-$page_title = "About Us - Grace Fellowship Church";
-$page_description = "Learn about Grace Fellowship Church - Our history, mission, vision, and leadership team.";
+$page_title = "About Us - Christ performing Christian Centre";
+$page_description = "Learn about Christ performing Christian Centre - Our history, mission, vision, and leadership team.";
+$current_page = 'about'; 
 include '../includes/header.php'; 
 ?>
     <style>
         :root {
-            --primary-color: #1e3a8a;
-            --secondary-color: #fbbf24;
+            --primary-color: #0b2067;
+            --secondary-color: #f2db37;
             --accent-color: #059669;
             --text-dark: #1f2937;
             --text-light: #6b7280;
@@ -189,7 +190,7 @@ include '../includes/header.php';
         }
 
         .footer a:hover {
-            color: var(--secondary-color);
+            color: white;
         }
 
         .social-icons a {
@@ -215,7 +216,7 @@ include '../includes/header.php';
 <section class="page-header">
     <div class="container">
         <div data-aos="fade-up">
-            <h1 class="font-display">About Grace Fellowship Church</h1>
+            <h1 class="font-display">About Christ performing Christian Centre</h1>
             <p>Building Faith, Strengthening Community, Serving with Love</p>
         </div>
     </div>
@@ -227,7 +228,7 @@ include '../includes/header.php';
         <div class="row align-items-center">
             <div class="col-lg-6" data-aos="fade-right">
                 <h2 class="font-display mb-4">Our Story</h2>
-                <p class="mb-4">Grace Fellowship Church was founded in 1985 with a simple yet powerful vision: to create a place where people could encounter God's love, grow in their faith, and build meaningful relationships with one another.</p>
+                <p class="mb-4">Christ performing Christian Centre was founded in 1985 with a simple yet powerful vision: to create a place where people could encounter God's love, grow in their faith, and build meaningful relationships with one another.</p>
                 <p class="mb-4">What began as a small gathering of 20 believers in a rented hall has grown into a vibrant community of over 2,000 members, united by our shared commitment to following Jesus Christ and serving our community.</p>
                 <p>Through decades of faithful ministry, we have witnessed countless lives transformed by the power of God's grace, and we continue to be amazed by His faithfulness in our midst.</p>
             </div>
@@ -282,7 +283,7 @@ include '../includes/header.php';
                     <div class="leader-card-body">
                         <h5>Pastor David Adebayo</h5>
                         <p class="text-primary">Senior Pastor</p>
-                        <p>Pastor David has been leading Grace Fellowship Church for over 15 years with wisdom, compassion, and a heart for God's people.</p>
+                        <p>Pastor David has been leading Christ performing Christian Centre for over 15 years with wisdom, compassion, and a heart for God's people.</p>
                     </div>
                 </div>
             </div>
@@ -318,28 +319,27 @@ include '../includes/header.php';
                 <h3 class="font-display mb-4">Visit Us</h3>
                 <div class="mb-3">
                     <i class="fas fa-map-marker-alt me-3"></i>
-                    <span>123 Faith Avenue, Victoria Island, Lagos, Nigeria</span>
+                    <span>23 Ayofayemi Street, off Princess Abiola Street, Nobex bus stop, Idimu Ikotun Road, Lagos, Nigeria</span>
                 </div>
                 <div class="mb-3">
                     <i class="fas fa-phone me-3"></i>
-                    <span>+234 801 234 5678</span>
+                    <span>+234 916 661 6862</span>
                 </div>
                 <div class="mb-3">
                     <i class="fas fa-envelope me-3"></i>
-                    <span>info@gracefellowshipchurch.org</span>
+                    <span>christperformingcentre@gmail.com</span>
                 </div>
                 <div class="mb-3">
                     <i class="fab fa-whatsapp me-3"></i>
-                    <span>+234 802 345 6789</span>
+                    <span>+234 916 664 8407</span>
                 </div>
             </div>
             <div class="col-md-6" data-aos="fade-left">
                 <h3 class="font-display mb-4">Service Times</h3>
                 <ul class="list-unstyled">
-                    <li class="mb-2"><strong>Sunday Worship:</strong> 9:00 AM & 11:30 AM</li>
-                    <li class="mb-2"><strong>Wednesday Bible Study:</strong> 7:00 PM</li>
-                    <li class="mb-2"><strong>Friday Night Prayer:</strong> 8:00 PM</li>
-                    <li class="mb-2"><strong>Youth Service:</strong> Saturday 5:00 PM</li>
+                    <li class="mb-2"><strong>Sunday Worship:</strong> 8:00 AM</li>
+                    <li class="mb-2"><strong>Thursday Midweek Service:</strong> 6:00 PM</li>
+                    <li class="mb-2"><strong>1st Day of the Month:</strong> Hour of Praise 6:00 PM</li>
                 </ul>
                 <div class="mt-4">
                     <h5>Follow Us</h5>

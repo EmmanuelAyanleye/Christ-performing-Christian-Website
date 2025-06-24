@@ -156,3 +156,32 @@ CREATE TABLE blog_comments (
     FOREIGN KEY (post_id) REFERENCES blog_posts(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
+
+-- Additional tables needed for the blog comment system
+CREATE TABLE blog_comment_likes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    comment_id INT NOT NULL,
+    user_id INT,
+    ip_address VARCHAR(45),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (comment_id) REFERENCES blog_comments(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- For comment replies
+ALTER TABLE blog_comments ADD COLUMN parent_id INT NULL AFTER post_id;
+ALTER TABLE blog_comments ADD FOREIGN KEY (parent_id) REFERENCES blog_comments(id) ON DELETE CASCADE;
+
+CREATE TABLE sermon_likes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sermon_id INT NOT NULL,
+    user_id INT,
+    type ENUM('like', 'dislike') NOT NULL,
+    ip_address VARCHAR(45),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sermon_id) REFERENCES sermons(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    UNIQUE KEY unique_like (sermon_id, user_id)
+);
+
+ALTER TABLE sermons ADD COLUMN dislikes INT DEFAULT 0 AFTER likes;

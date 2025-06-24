@@ -5,7 +5,7 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 
 // Site settings
-define('SITE_NAME', 'Grace Fellowship Church');
+define('SITE_NAME', 'Christ performing Christian Centre');
 
 // Manually define the base URL to avoid dynamic inconsistency issues
 define('BASE_URL', 'http://localhost/grace-fellowship-website');
@@ -34,6 +34,14 @@ try {
     error_log('Database Connection Error: ' . $e->getMessage());
     die("A database error occurred. Please check logs for details.");
 }
+
+// Email (SMTP) settings for PHPMailer
+define('SMTP_HOST', 'smtp.gmail.com');
+define('SMTP_USER', 'eaim269@gmail.com');
+define('SMTP_PASS', 'hwaw wjqn bqji kthh'); // IMPORTANT: Use a Google App Password here, not your regular password!
+define('SMTP_PORT', 587); // Use 587 for TLS or 465 for SSL
+define('SMTP_FROM_EMAIL', 'eaim269@gmail.com');
+define('SMTP_FROM_NAME', 'Christ performing Christian Centre');
 
 // Include utility functions
 require_once __DIR__ . '/functions.php';

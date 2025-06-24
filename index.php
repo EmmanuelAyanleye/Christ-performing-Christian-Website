@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/config.php'; // Load configuration and database connection
 
+$current_page = 'home'; 
 $contact_message = '';
 $newsletter_message = '';
 
@@ -80,14 +81,14 @@ $posts_stmt = $conn->prepare($posts_sql);
 $posts_stmt->execute();
 $posts = $posts_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch 3 approved testimonials
-$testimonials_sql = "SELECT * FROM testimonials WHERE status = 'approved' ORDER BY RAND() LIMIT 3";
+// Fetch ALL approved testimonials (remove the LIMIT 3)
+$testimonials_sql = "SELECT * FROM testimonials WHERE status = 'approved' ORDER BY created_at DESC";
 $testimonials_stmt = $conn->prepare($testimonials_sql);
 $testimonials_stmt->execute();
 $testimonials = $testimonials_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $page_title = "Welcome Home";
-$page_description = "Join Grace Fellowship Church - A vibrant Christian community in Nigeria. Experience worship, grow in faith, and connect with others.";
+$page_description = "Join Christ performing Christian Centre - A vibrant Christian community in Nigeria. Experience worship, grow in faith, and connect with others.";
 include 'includes/header.php';
 
 // Fetch 6 gallery images for the snippet
@@ -100,8 +101,8 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <style>
         :root {
-            --primary-color: #1e3a8a;
-            --secondary-color: #fbbf24;
+            --primary-color: #0b2067;
+            --secondary-color: #f2db37;
             --accent-color: #059669;
             --text-dark: #1f2937;
             --text-light: #6b7280;
@@ -204,7 +205,8 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .btn-primary-custom:hover {
-            background: #f59e0b;
+            background: #b2201e;
+            color: white;
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3);
         }
@@ -294,6 +296,45 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             border-radius: 50%;
             margin: 0 auto 1rem;
             object-fit: cover;
+        }
+
+        /* Testimonials Carousel */
+        .testimonial-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 1rem;
+            border: 3px solid var(--secondary-color);
+        }
+
+        .carousel-controls {
+            position: relative;
+            z-index: 1;
+        }
+
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: auto;
+            opacity: 1;
+        }
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            padding: 15px;
+            background-size: 60%;
+        }
+
+        .testimonial-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin: 0 10px;
+            height: 100%;
         }
 
         /* Gallery */
@@ -387,7 +428,7 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
 <!-- Hero Section -->
 <section id="home" class="hero">
     <div class="hero-content" data-aos="fade-up">
-        <h1 class="font-display">Welcome to Grace Fellowship Church</h1>
+        <h1 class="font-display">Welcome to Christ performing Christian Centre</h1>
         <p>Building Faith, Strengthening Community, Serving with Love</p>
         <a href="#about" class="btn btn-primary-custom">Discover Our Story</a>
     </div>
@@ -407,7 +448,7 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
             <div class="col-lg-6" data-aos="fade-left">
                 <h3 class="font-display mb-3">Our Mission</h3>
-                <p class="mb-4">Grace Fellowship Church is a vibrant Christian community in the heart of Nigeria, dedicated to spreading God's love, building strong relationships, and serving our community with compassion and purpose.</p>
+                <p class="mb-4">Christ performing Christian Centre is a vibrant Christian community in the heart of Nigeria, dedicated to spreading God's love, building strong relationships, and serving our community with compassion and purpose.</p>
                 <p class="mb-4">We believe in creating an environment where everyone can experience God's grace, grow in their faith, and find their calling to serve others.</p>
                 <a href="pages/about.php" class="btn btn-primary-custom">Learn More About Us</a>
             </div>
@@ -527,30 +568,76 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </section>
 
-<!-- Testimonials -->
+<!-- Testimonials Carousel -->
 <section class="section-padding">
     <div class="container">
         <div class="section-title" data-aos="fade-up">
             <h2 class="font-display">Testimonials</h2>
             <p>Hear from our church family about their journey of faith</p>
         </div>
-        <div class="row">
-            <?php foreach($testimonials as $testimonial): ?>
-            <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
-                <div class="testimonial-card h-100">
-                    <img src="<?php echo htmlspecialchars($testimonial['avatar_url'] ?: 'https://via.placeholder.com/80'); ?>" 
-                         alt="<?php echo htmlspecialchars($testimonial['name']); ?>" class="testimonial-avatar">
-                    <h5><?php echo htmlspecialchars($testimonial['name']); ?></h5>
-                    <p class="text-muted mb-3"><?php echo htmlspecialchars($testimonial['role']); ?></p>
-                    <p class="fst-italic">"<?php echo htmlspecialchars($testimonial['content']); ?>"</p>
-                    <div class="text-warning">
-                        <?php for($i = 0; $i < (int)$testimonial['rating']; $i++): ?>
-                            <i class="fas fa-star"></i>
-                        <?php endfor; ?>
+        
+        <div id="testimonialsCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <?php foreach(array_chunk($testimonials, 3) as $index => $testimonialGroup): ?>
+                <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?>">
+                    <div class="row">
+                        <?php foreach($testimonialGroup as $testimonial): ?>
+                        <div class="col-md-4 mb-4">
+                            <div class="testimonial-card h-100">
+                                <?php
+                                // Set default avatar path
+                                $defaultAvatar = BASE_URL . '/images/church_logo.png';
+                                
+                                // Check if avatar exists in database and is not empty
+                                if (!empty($testimonial['avatar_url'])) {
+                                    // Handle the different path formats
+                                    if (strpos($testimonial['avatar_url'], '../') === 0) {
+                                        // For testimonial paths like "../uploads/avatars/..."
+                                        $avatarPath = str_replace('../', '', $testimonial['avatar_url']);
+                                        $avatarSrc = BASE_URL . '/' . ltrim($avatarPath, '/');
+                                    } else {
+                                        // For other paths (absolute or relative)
+                                        $avatarSrc = $testimonial['avatar_url'];
+                                        
+                                        // If it's not a full URL, prepend BASE_URL
+                                        if (!filter_var($avatarSrc, FILTER_VALIDATE_URL)) {
+                                            $avatarSrc = BASE_URL . '/' . ltrim($avatarSrc, '/');
+                                        }
+                                    }
+                                } else {
+                                    $avatarSrc = $defaultAvatar;
+                                }
+                                ?>
+                                <img src="<?php echo htmlspecialchars($avatarSrc); ?>" 
+                                     alt="<?php echo htmlspecialchars($testimonial['name']); ?>" 
+                                     class="testimonial-avatar"
+                                     onerror="this.onerror=null;this.src='<?php echo htmlspecialchars($defaultAvatar); ?>'">
+                                <h5><?php echo htmlspecialchars($testimonial['name']); ?></h5>
+                                <p class="text-muted mb-3"><?php echo htmlspecialchars($testimonial['role']); ?></p>
+                                <p class="fst-italic">"<?php echo htmlspecialchars($testimonial['content']); ?>"</p>
+                                <div class="text-warning">
+                                    <?php for($i = 0; $i < (int)$testimonial['rating']; $i++): ?>
+                                        <i class="fas fa-star"></i>
+                                    <?php endfor; ?>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
                     </div>
                 </div>
+                <?php endforeach; ?>
             </div>
-            <?php endforeach; ?>
+            
+            <?php if (count($testimonials) > 3): ?>
+            <div class="carousel-controls text-center mt-4">
+                <button class="btn btn-outline-primary me-2" type="button" data-bs-target="#testimonialsCarousel" data-bs-slide="prev">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <button class="btn btn-outline-primary" type="button" data-bs-target="#testimonialsCarousel" data-bs-slide="next">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 </section>
@@ -597,19 +684,19 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
                     <h4 class="mb-4">Contact Information</h4>
                     <div class="contact-item mb-4 d-flex align-items-start">
                         <i class="fas fa-map-marker-alt text-primary fa-fw me-3 mt-1"></i>
-                        <div><strong>Address</strong><br>123 Faith Avenue, Victoria Island, Lagos, Nigeria</div>
+                        <div><strong>Address</strong><br>23 Ayofayemi Street, off Princess Abiola Street, Nobex bus stop, Idimu Ikotun Road, Lagos, Nigeria</div>
                     </div>
                     <div class="contact-item mb-4 d-flex align-items-start">
                         <i class="fas fa-phone text-primary fa-fw me-3 mt-1"></i>
-                        <div><strong>Phone</strong><br>+234 801 234 5678</div>
+                        <div><strong>Phone</strong><br>+234 916 661 6862</div>
                     </div>
                     <div class="contact-item mb-4 d-flex align-items-start">
                         <i class="fas fa-envelope text-primary fa-fw me-3 mt-1"></i>
-                        <div><strong>Email</strong><br>info@gracefellowshipchurch.org</div>
+                        <div><strong>Email</strong><br>christperformingcentre@gmail.com</div>
                     </div>
                     <div class="contact-item mb-4 d-flex align-items-start">
                         <i class="fab fa-whatsapp text-primary fa-fw me-3 mt-1"></i>
-                        <div><strong>WhatsApp</strong><br>+234 802 345 6789</div>
+                        <div><strong>WhatsApp</strong><br>+234 916 664 8407</div>
                     </div>
                 </div>
             </div>

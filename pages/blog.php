@@ -1,86 +1,104 @@
 <?php
 require_once __DIR__ . '/../includes/config.php'; // Load configuration and database connection
-require_once __DIR__ . '/../includes/config.php'; // Load configuration and database connection
+$current_page = 'blog';
 
-// Initialize newsletter message variable
+// --- NEWSLETTER FORM HANDLING ---
 $newsletter_message = '';
-
-// Handle newsletter subscription
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['newsletter_email'])) {
-    $email = trim($_POST['newsletter_email']);
-    
-    // Validate email
+    $email = sanitize_input($_POST['newsletter_email']);
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $newsletter_message = '<div class="alert alert-danger">Please enter a valid email address.</div>';
     } else {
         try {
-            // Check if email already exists
-            $stmt = $pdo->prepare("SELECT id FROM subscribers WHERE email = ?");
+            $stmt = $conn->prepare("SELECT id, is_active FROM subscribers WHERE email = ?");
             $stmt->execute([$email]);
-            
-            if ($stmt->rowCount() > 0) {
-                // Check if subscriber is active
-                $stmt = $pdo->prepare("SELECT id FROM subscribers WHERE email = ? AND is_active = 1");
+            $subscriber = $stmt->fetch();
+            if ($subscriber && $subscriber['is_active']) {
+                $newsletter_message = '<div class="alert alert-info">You are already subscribed. Thank you!</div>';
+            } elseif ($subscriber && !$subscriber['is_active']) {
+                $stmt = $conn->prepare("UPDATE subscribers SET is_active = 1, unsubscribed_at = NULL WHERE email = ?");
                 $stmt->execute([$email]);
-                
-                if ($stmt->rowCount() > 0) {
-                    $newsletter_message = '<div class="alert alert-info">You are already subscribed. Thank you!</div>';
-                } else {
-                    // Reactivate existing subscriber
-                    $stmt = $pdo->prepare("UPDATE subscribers SET is_active = 1, subscribed_at = NOW(), unsubscribed_at = NULL WHERE email = ?");
-                    $stmt->execute([$email]);
-                    $newsletter_message = '<div class="alert alert-success">Welcome back! Your subscription has been reactivated.</div>';
-                }
+                $newsletter_message = '<div class="alert alert-success">Welcome back! Your subscription has been reactivated.</div>';
             } else {
-                // Insert new subscriber
-                $stmt = $pdo->prepare("INSERT INTO subscribers (email, subscribed_at) VALUES (?, NOW())");
+                $stmt = $conn->prepare("INSERT INTO subscribers (email) VALUES (?)");
                 $stmt->execute([$email]);
-                
                 $newsletter_message = '<div class="alert alert-success">Thank you for subscribing to our newsletter!</div>';
-                
-                // Optional: Send welcome email
-                // send_welcome_email($email);
             }
         } catch (PDOException $e) {
-            error_log("Subscription Error: " . $e->getMessage());
-            $newsletter_message = '<div class="alert alert-danger">Sorry, there was an error processing your subscription. Please try again later.</div>';
+            $newsletter_message = '<div class="alert alert-danger">An error occurred. Please try again.</div>';
         }
     }
 }
 
-// Get current page from URL, default to 1
+// --- FILTERS, SEARCH, AND PAGINATION ---
+$search_term = $_GET['search'] ?? '';
+$filter_category = $_GET['category'] ?? '';
+$filter_tag = $_GET['tag'] ?? '';
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$per_page = 10;
+if ($page < 1) $page = 1;
+$per_page = 7; // Number of posts per page
 $offset = ($page - 1) * $per_page;
 
-// Get total posts count
-$total_posts_sql = "SELECT COUNT(*) FROM blog_posts WHERE status = 'published'";
-$total_posts_stmt = $conn->query($total_posts_sql);
-$total_posts = $total_posts_stmt->fetchColumn();
+// --- BUILD QUERY ---
+$base_sql = "FROM blog_posts p JOIN users u ON p.author_id = u.id WHERE p.status = 'published'";
+$where_clauses = [];
+$params = [];
 
-// Calculate total pages
+if (!empty($search_term)) {
+    $where_clauses[] = "(p.title LIKE :search OR p.content LIKE :search OR u.full_name LIKE :search)";
+    $params[':search'] = '%' . $search_term . '%';
+}
+if (!empty($filter_category)) {
+    $where_clauses[] = "p.category = :category";
+    $params[':category'] = $filter_category;
+}
+if (!empty($filter_tag)) {
+    $where_clauses[] = "FIND_IN_SET(:tag, p.tags)";
+    $params[':tag'] = $filter_tag;
+}
+
+$where_sql = '';
+if (!empty($where_clauses)) {
+    $where_sql = ' AND ' . implode(' AND ', $where_clauses);
+}
+
+// --- TOTAL COUNT ---
+$total_posts_sql = "SELECT COUNT(*) " . $base_sql . $where_sql;
+$total_posts_stmt = $conn->prepare($total_posts_sql);
+$total_posts_stmt->execute($params);
+$total_posts = $total_posts_stmt->fetchColumn();
 $total_pages = ceil($total_posts / $per_page);
 
-// Get posts for current page
-$posts_sql = "SELECT * FROM blog_posts WHERE status = 'published' ORDER BY created_at DESC LIMIT :offset, :per_page";
+// --- FETCH POSTS FOR CURRENT PAGE ---
+$posts_sql = "SELECT p.*, u.full_name as author_name " . $base_sql . $where_sql . " ORDER BY p.created_at DESC LIMIT :offset, :per_page";
 $posts_stmt = $conn->prepare($posts_sql);
-$posts_stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
-$posts_stmt->bindParam(':per_page', $per_page, PDO::PARAM_INT);
+foreach ($params as $key => $val) {
+    $posts_stmt->bindValue($key, $val);
+}
+$posts_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$posts_stmt->bindValue(':per_page', $per_page, PDO::PARAM_INT);
 $posts_stmt->execute();
 $posts = $posts_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Get categories for sidebar
-$categories_sql = "SELECT category, COUNT(*) as count FROM blog_posts WHERE status = 'published' GROUP BY category";
-$categories_stmt = $conn->query($categories_sql);
-$categories = $categories_stmt->fetchAll(PDO::FETCH_ASSOC);
+// --- SIDEBAR DATA ---
+$categories_sql = "SELECT category, COUNT(*) as count FROM blog_posts WHERE status = 'published' AND category IS NOT NULL AND category != '' GROUP BY category ORDER BY category ASC";
+$categories = $conn->query($categories_sql)->fetchAll(PDO::FETCH_ASSOC);
 
-// Get recent posts for sidebar
-$recent_posts_sql = "SELECT id, title, featured_image, created_at FROM blog_posts WHERE status = 'published' ORDER BY created_at DESC LIMIT 3";
-$recent_posts_stmt = $conn->query($recent_posts_sql);
-$recent_posts = $recent_posts_stmt->fetchAll(PDO::FETCH_ASSOC);
+$recent_posts_sql = "SELECT title, slug, featured_image, created_at FROM blog_posts WHERE status = 'published' ORDER BY created_at DESC LIMIT 3";
+$recent_posts = $conn->query($recent_posts_sql)->fetchAll(PDO::FETCH_ASSOC);
+
+$tags_sql = "SELECT tags FROM blog_posts WHERE status = 'published' AND tags IS NOT NULL AND tags != ''";
+$all_tags_raw = $conn->query($tags_sql)->fetchAll(PDO::FETCH_COLUMN);
+$tags_array = [];
+foreach ($all_tags_raw as $tag_string) {
+    $tags_array = array_merge($tags_array, array_map('trim', explode(',', $tag_string)));
+}
+$tags = array_count_values(array_filter($tags_array)); // Count occurrences of each tag
+arsort($tags); // Sort by value (count) in descending order
+$tags = array_slice($tags, 0, 12, true); // Get the top 12 most used tags, preserving keys
 
 $page_title = "Our Blog";
-$page_description = "Read inspiring articles, devotions, and updates from Grace Fellowship Church. Grow in your faith through our blog content.";
+$page_description = "Read inspiring articles, devotions, and updates from Christ performing Christian Centre. Grow in your faith through our blog content.";
 include '../includes/header.php';
 ?>
 <style>
@@ -429,7 +447,7 @@ include '../includes/header.php';
             border-color: var(--primary-color);
         }
     </style>
-    
+
 <!-- Page Header -->
 <section class="page-header">
     <div class="container">
@@ -440,75 +458,96 @@ include '../includes/header.php';
     </div>
 </section>
 
-<!-- Blog Section -->
 <section class="section-padding">
     <div class="container">
         <div class="row">
             <!-- Blog Posts -->
             <div class="col-lg-8">
                 <div id="blogContainer">
-                    <?php foreach($posts as $post): ?>
-                    <div class="blog-post" data-aos="fade-up">
-                        <article class="blog-card">
-                            <img src="<?php echo htmlspecialchars($post['featured_image']); ?>" alt="<?php echo htmlspecialchars($post['title']); ?>">
-                            <div class="blog-card-body">
-                                <div>
-                                    <div class="blog-meta">
-                                        <span><i class="fas fa-user me-1"></i><?php echo get_author_name($post['author_id']); ?></span>
-                                        <span><i class="fas fa-calendar me-1"></i><?php echo date('M j, Y', strtotime($post['created_at'])); ?></span>
-                                        <span><i class="fas fa-folder me-1"></i><?php echo htmlspecialchars($post['category']); ?></span>
+                    <?php if (empty($posts)): ?>
+                        <div class="text-center" data-aos="fade-up">
+                            <h3>No Posts Found</h3>
+                            <p>Your search or filter did not return any results. Please try again.</p>
+                            <a href="blog.php" class="btn btn-primary mt-3">View All Posts</a>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach($posts as $post): ?>
+                        <div class="blog-post" data-aos="fade-up">
+                            <article class="blog-card">
+                                <a href="blog-article.php?slug=<?php echo $post['slug']; ?>">
+                                    <img src="<?php echo BASE_URL . '/' . htmlspecialchars($post['featured_image']); ?>" 
+                                         alt="<?php echo htmlspecialchars($post['title']); ?>"
+                                         onerror="this.onerror=null; this.src='<?php echo BASE_URL; ?>/assets/images/default-image.jpg';">
+                                </a>
+                                <div class="blog-card-body">
+                                    <div>
+                                        <div class="blog-meta">
+                                            <span><i class="fas fa-user me-1"></i><?php echo htmlspecialchars($post['author_name']); ?></span>
+                                            <span><i class="fas fa-calendar me-1"></i><?php echo format_date($post['created_at']); ?></span>
+                                            <span><i class="fas fa-folder me-1"></i><?php echo htmlspecialchars($post['category']); ?></span>
+                                        </div>
+                                        <h5><a href="blog-article.php?slug=<?php echo $post['slug']; ?>" class="text-decoration-none text-dark"><?php echo htmlspecialchars($post['title']); ?></a></h5>
+                                        <p class="text-muted"><?php echo htmlspecialchars($post['excerpt']); ?></p>
                                     </div>
-                                    <h5><a href="blog-article.php?id=<?php echo $post['id']; ?>" class="text-decoration-none text-dark"><?php echo htmlspecialchars($post['title']); ?></a></h5>
-                                    <p class="text-muted"><?php echo htmlspecialchars(substr($post['excerpt'], 0, 150)); ?>...</p>
+                                    <div class="blog-tags">
+                                        <?php if(!empty($post['tags'])): ?>
+                                            <?php foreach(explode(',', $post['tags']) as $tag): ?>
+                                                <a href="blog.php?tag=<?php echo urlencode(trim($tag)); ?>" class="blog-tag"><?php echo htmlspecialchars(trim($tag)); ?></a>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
-                                <div class="blog-tags">
-                                    <a href="#" class="blog-tag"><?php echo htmlspecialchars($post['category']); ?></a>
-                                </div>
-                            </div>
-                        </article>
-                    </div>
-                    <?php endforeach; ?>
+                            </article>
+                        </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Pagination -->
-                <nav aria-label="Blog pagination" class="mt-4">
-                    <ul class="pagination justify-content-center">
-                        <?php if($page > 1): ?>
-                        <li class="page-item">
-                            <a class="page-link" href="?page=<?php echo $page - 1; ?>" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                        <?php endif; ?>
-                        
-                        <?php for($i = 1; $i <= $total_pages; $i++): ?>
-                        <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
-                            <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
-                        </li>
-                        <?php endfor; ?>
-                        
-                        <?php if($page < $total_pages): ?>
-                        <li class="page-item">
-                            <a class="page-link" href="?page=<?php echo $page + 1; ?>" aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                        <?php endif; ?>
-                    </ul>
-                </nav>
+                <?php if ($total_pages > 1): ?>
+                    <nav aria-label="Blog pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <?php
+                            $query_params = http_build_query(['search' => $search_term, 'category' => $filter_category, 'tag' => $filter_tag]);
+                            ?>
+                            <li class="page-item <?php echo ($page <= 1) ? 'disabled' : ''; ?>">
+                                <a class="page-link" href="?page=<?php echo $page - 1; ?>&<?php echo $query_params; ?>" aria-label="Previous">&laquo;</a>
+                            </li>
+                            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                                <li class="page-item <?php echo ($i == $page) ? 'active' : ''; ?>">
+                                    <a class="page-link" href="?page=<?php echo $i; ?>&<?php echo $query_params; ?>"><?php echo $i; ?></a>
+                                </li>
+                            <?php endfor; ?>
+                            <li class="page-item <?php echo ($page >= $total_pages) ? 'disabled' : ''; ?>">
+                                <a class="page-link" href="?page=<?php echo $page + 1; ?>&<?php echo $query_params; ?>" aria-label="Next">&raquo;</a>
+                            </li>
+                        </ul>
+                    </nav>
+                <?php endif; ?>
             </div>
 
             <!-- Sidebar -->
             <div class="col-lg-4">
                 <div class="sidebar">
+                    <!-- Search Widget -->
+                    <div class="sidebar-widget" data-aos="fade-left">
+                        <form action="blog.php" method="GET">
+                            <div class="input-group">
+                                <input type="text" name="search" class="form-control" placeholder="Search..." value="<?php echo htmlspecialchars($search_term); ?>">
+                                <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                            </div>
+                        </form>
+                    </div>
+
                     <!-- Categories Widget -->
                     <div class="sidebar-widget" data-aos="fade-left">
                         <h5><i class="fas fa-folder me-2"></i>Categories</h5>
                         <ul class="category-list">
+                            <li><a href="blog.php">All Categories <span class="float-end">(<?php echo $total_posts; ?>)</span></a></li>
                             <?php foreach($categories as $category): ?>
-                            <li><a href="#" onclick="filterByCategory('<?php echo htmlspecialchars($category['category']); ?>')">
-                                <?php echo htmlspecialchars($category['category']); ?> <span class="float-end">(<?php echo $category['count']; ?>)</span>
-                            </a></li>
+                                <li><a href="blog.php?category=<?php echo urlencode($category['category']); ?>">
+                                    <?php echo htmlspecialchars($category['category']); ?> <span class="float-end">(<?php echo $category['count']; ?>)</span>
+                                </a></li>
                             <?php endforeach; ?>
                         </ul>
                     </div>
@@ -518,13 +557,27 @@ include '../includes/header.php';
                         <h5><i class="fas fa-clock me-2"></i>Recent Posts</h5>
                         <?php foreach($recent_posts as $recent_post): ?>
                         <div class="recent-post">
-                            <img src="<?php echo htmlspecialchars($recent_post['featured_image']); ?>" alt="Recent Post">
+                            <a href="blog-article.php?slug=<?php echo $recent_post['slug']; ?>">
+                                <img src="<?php echo BASE_URL . '/' . htmlspecialchars($recent_post['featured_image']); ?>" 
+                                     alt="<?php echo htmlspecialchars($recent_post['title']); ?>"
+                                     onerror="this.onerror=null; this.src='<?php echo BASE_URL; ?>/assets/images/default-image.jpg';">
+                            </a>
                             <div class="recent-post-content">
-                                <h6><a href="blog-article.php?id=<?php echo $recent_post['id']; ?>" class="text-decoration-none"><?php echo htmlspecialchars($recent_post['title']); ?></a></h6>
-                                <small><?php echo date('M j, Y', strtotime($recent_post['created_at'])); ?></small>
+                                <h6><a href="blog-article.php?slug=<?php echo $recent_post['slug']; ?>" class="text-decoration-none"><?php echo htmlspecialchars($recent_post['title']); ?></a></h6>
+                                <small><?php echo format_date($recent_post['created_at']); ?></small>
                             </div>
                         </div>
                         <?php endforeach; ?>
+                    </div>
+
+                    <!-- Tags Widget -->
+                    <div class="sidebar-widget" data-aos="fade-left" data-aos-delay="200">
+                        <h5><i class="fas fa-tags me-2"></i>Popular Tags</h5>
+                        <div class="tags-cloud">
+                            <?php foreach($tags as $tag => $count): ?>
+                                <a href="blog.php?tag=<?php echo urlencode($tag); ?>" class="blog-tag"><?php echo htmlspecialchars($tag); ?></a>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
 
                     <!-- Newsletter Widget -->
@@ -532,7 +585,7 @@ include '../includes/header.php';
                         <h5><i class="fas fa-envelope me-2"></i>Newsletter</h5>
                         <p class="mb-3">Subscribe to receive our latest blog posts and church updates.</p>
                         <?php if (!empty($newsletter_message)) echo $newsletter_message; ?>
-                        <form method="POST">
+                        <form action="blog.php#newsletter" method="POST">
                             <div class="mb-3">
                                 <input type="email" name="newsletter_email" class="form-control" placeholder="Enter your email address" required>
                             </div>

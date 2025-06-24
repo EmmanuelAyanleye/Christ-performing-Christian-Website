@@ -62,7 +62,33 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $message = '<div class="alert alert-danger">Admin deleted successfully!</div>';
 }
 
-$admins = $pdo->query("SELECT * FROM users WHERE role != 'editor'")->fetchAll(PDO::FETCH_ASSOC);
+// Search and filter functionality
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
+
+// Base query
+$query = "SELECT * FROM users WHERE role != 'editor'";
+$params = [];
+
+// Add search condition
+if (!empty($search)) {
+    $query .= " AND (full_name LIKE ? OR email LIKE ?)";
+    $search_term = "%$search%";
+    $params[] = $search_term;
+    $params[] = $search_term;
+}
+
+// Add status filter
+if ($status_filter !== 'all') {
+    $query .= " AND status = ?";
+    $params[] = $status_filter;
+}
+
+// Prepare and execute the query
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
+$admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 include 'partials/header.php';
 include 'partials/sidebar.php';
 ?>
@@ -77,6 +103,30 @@ include 'partials/sidebar.php';
 
     <?= $message ?>
 
+    <!-- Search and Filter Section -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" name="search" placeholder="Search by name or email..." value="<?= htmlspecialchars($search) ?>">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" name="status">
+                        <option value="all" <?= $status_filter === 'all' ? 'selected' : '' ?>>All Statuses</option>
+                        <option value="active" <?= $status_filter === 'active' ? 'selected' : '' ?>>Active</option>
+                        <option value="inactive" <?= $status_filter === 'inactive' ? 'selected' : '' ?>>Inactive</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card mt-4">
         <div class="card-body table-responsive">
             <table class="table table-hover">
@@ -90,18 +140,24 @@ include 'partials/sidebar.php';
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($admins as $admin): ?>
+                    <?php if (empty($admins)): ?>
                         <tr>
-                            <td><?= htmlspecialchars($admin['full_name']) ?></td>
-                            <td><?= htmlspecialchars($admin['email']) ?></td>
-                            <td><span class="badge bg-<?= $admin['role'] === 'super_admin' ? 'danger' : 'primary' ?>"><?= ucfirst($admin['role']) ?></span></td>
-                            <td><span class="badge bg-<?= $admin['status'] === 'active' ? 'success' : 'secondary' ?>"><?= ucfirst($admin['status']) ?></span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary" onclick='editAdmin(<?= json_encode($admin) ?>)'><i class="fas fa-edit"></i></button>
-                                <a href="?delete=<?= $admin['id'] ?>" onclick="return confirm('Delete this admin?')" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
-                            </td>
+                            <td colspan="5" class="text-center">No admins found</td>
                         </tr>
-                    <?php endforeach; ?>
+                    <?php else: ?>
+                        <?php foreach ($admins as $admin): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($admin['full_name']) ?></td>
+                                <td><?= htmlspecialchars($admin['email']) ?></td>
+                                <td><span class="badge bg-<?= $admin['role'] === 'super_admin' ? 'danger' : 'primary' ?>"><?= ucfirst($admin['role']) ?></span></td>
+                                <td><span class="badge bg-<?= $admin['status'] === 'active' ? 'success' : 'secondary' ?>"><?= ucfirst($admin['status']) ?></span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick='editAdmin(<?= json_encode($admin) ?>)'><i class="fas fa-edit"></i></button>
+                                    <a href="?delete=<?= $admin['id'] ?>" onclick="return confirm('Delete this admin?')" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>

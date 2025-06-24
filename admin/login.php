@@ -5,7 +5,7 @@ if (isset($_SESSION['admin_logged_in'])) {
     exit();
 }
 
-$pageTitle = "Admin Login - Grace Fellowship Church";
+$pageTitle = "Admin Login - Christ performing Christian Centre";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -13,14 +13,16 @@ $pageTitle = "Admin Login - Grace Fellowship Church";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle; ?></title>
+    <link rel="icon" type="image/png" href="../images/church_logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="../assets/css/admin-style.css" rel="stylesheet">
+    
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            background: linear-gradient(135deg, #1d178c 0%, #3498db 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -32,7 +34,7 @@ $pageTitle = "Admin Login - Grace Fellowship Church";
             box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             padding: 3rem;
             width: 100%;
-            max-width: 400px;
+            max-width: 500px;
         }
         .logo {
             text-align: center;
@@ -57,7 +59,7 @@ $pageTitle = "Admin Login - Grace Fellowship Church";
             box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
         }
         .btn-login {
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            background: linear-gradient(135deg, #3f39cd, #1d178c);
             border: none;
             border-radius: 10px;
             padding: 12px;
@@ -84,7 +86,8 @@ $pageTitle = "Admin Login - Grace Fellowship Church";
 <body>
     <div class="login-container">
         <div class="logo">
-            <h2><i class="fas fa-church text-primary"></i> Grace Fellowship</h2>
+            <img src="../images/church_logo.png" alt="Church Logo" width="60" height="60">
+            <h2>Christ performing Christian Centre</h2>
             <p>Admin Panel Login</p>
         </div>
         

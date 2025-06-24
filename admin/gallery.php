@@ -67,9 +67,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_id'])) {
     $message = '<div class="alert alert-success">Photo details updated successfully!</div>';
 }
 
-// Fetch all gallery items
-$stmt = $pdo->query("SELECT * FROM gallery ORDER BY upload_date DESC");
+// Get filter values from query parameters
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$category_filter = isset($_GET['category']) ? $_GET['category'] : 'all';
+$date_filter = isset($_GET['date']) ? $_GET['date'] : '';
+
+// Build the base query
+$query = "SELECT * FROM gallery";
+$where = [];
+$params = [];
+
+// Add search condition
+if (!empty($search)) {
+    $where[] = "(title LIKE ? OR description LIKE ? OR tags LIKE ?)";
+    $search_term = "%$search%";
+    $params[] = $search_term;
+    $params[] = $search_term;
+    $params[] = $search_term;
+}
+
+// Add category filter
+if ($category_filter !== 'all') {
+    $where[] = "category = ?";
+    $params[] = $category_filter;
+}
+
+// Add date filter
+if (!empty($date_filter)) {
+    $where[] = "DATE(event_date) = ?";
+    $params[] = $date_filter;
+}
+
+// Combine WHERE conditions
+if (!empty($where)) {
+    $query .= " WHERE " . implode(" AND ", $where);
+}
+
+// Add sorting
+$query .= " ORDER BY event_date DESC";
+
+// Prepare and execute the query
+$stmt = $pdo->prepare($query);
+$stmt->execute($params);
 $galleryItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Get all categories for filter dropdown
+$categories = $pdo->query("SELECT DISTINCT category FROM gallery ORDER BY category")->fetchAll(PDO::FETCH_COLUMN);
 
 $pageTitle = "Manage Gallery";
 include 'partials/header.php';
@@ -86,9 +129,39 @@ include 'partials/sidebar.php';
 
     <?= $message ?>
 
+    <!-- Search and Filter Section -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" name="search" placeholder="Search by title, description, or tags..." value="<?= htmlspecialchars($search) ?>">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="category">
+                        <option value="all" <?= $category_filter === 'all' ? 'selected' : '' ?>>All Categories</option>
+                        <?php foreach ($categories as $category): ?>
+                            <option value="<?= htmlspecialchars($category) ?>" <?= $category_filter === $category ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($category) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="date" class="form-control" name="date" value="<?= htmlspecialchars($date_filter) ?>">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card mt-4">
         <div class="card-body table-responsive">
-            <table class="table table-striped table-bordered align-middle">
+            <table class="table align-middle">
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>
@@ -125,7 +198,7 @@ include 'partials/sidebar.php';
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="8" class="text-center">No photos in gallery yet.</td>
+                            <td colspan="8" class="text-center">No photos found matching your criteria.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
