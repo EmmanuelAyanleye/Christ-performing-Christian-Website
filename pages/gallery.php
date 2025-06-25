@@ -12,19 +12,20 @@ $per_page = 12; // Number of images per page
 $offset = ($page - 1) * $per_page;
 
 // --- BUILD QUERY ---
-$where_clauses = [];
-$params = [];
+$where_clauses = []; // Stores parts of the WHERE clause
+$params_for_execute = []; // Stores parameters for PDOStatement::execute() in order
 
 if (!empty($search_term)) {
-    $where_clauses[] = "(title LIKE :search OR description LIKE :search OR tags LIKE :search)";
-    $params[':search'] = '%' . $search_term . '%';
+    $where_clauses[] = "(title LIKE ? OR description LIKE ? OR tags LIKE ?)"; // Use positional placeholders
+    $params_for_execute[] = '%' . $search_term . '%';
+    $params_for_execute[] = '%' . $search_term . '%';
+    $params_for_execute[] = '%' . $search_term . '%';
 }
 
 if (!empty($filter_category)) {
-    $where_clauses[] = "category = :category";
-    $params[':category'] = $filter_category;
+    $where_clauses[] = "category = ?"; // Use positional placeholder
+    $params_for_execute[] = $filter_category;
 }
-
 $where_sql = '';
 if (!empty($where_clauses)) {
     $where_sql = ' WHERE ' . implode(' AND ', $where_clauses);
@@ -32,24 +33,19 @@ if (!empty($where_clauses)) {
 
 // --- TOTAL COUNT ---
 $total_sql = "SELECT COUNT(*) FROM gallery" . $where_sql;
-$total_stmt = $conn->prepare($total_sql);
-$total_stmt->execute($params);
+$total_stmt = $conn->prepare($total_sql); // Prepare statement for total count
+$total_stmt->execute($params_for_execute); // Execute with collected parameters
 $total_items = $total_stmt->fetchColumn();
 $total_pages = ceil($total_items / $per_page);
 
 // --- FETCH GALLERY ITEMS FOR CURRENT PAGE ---
-$gallery_sql = "SELECT * FROM gallery " . $where_sql . " ORDER BY event_date DESC, created_at DESC LIMIT :offset, :per_page";
+$gallery_sql = "SELECT * FROM gallery " . $where_sql . " ORDER BY event_date DESC, created_at DESC LIMIT ?, ?";
 $gallery_stmt = $conn->prepare($gallery_sql);
 
-// Bind WHERE params
-foreach ($params as $key => &$val) {
-    $gallery_stmt->bindParam($key, $val);
-}
-// Bind LIMIT params
-$gallery_stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
-$gallery_stmt->bindParam(':per_page', $per_page, PDO::PARAM_INT);
-
-$gallery_stmt->execute();
+// Append LIMIT parameters to the same array
+$params_for_execute[] = $offset;
+$params_for_execute[] = $per_page;
+$gallery_stmt->execute($params_for_execute); // Execute with all parameters
 $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // --- FETCH ALL CATEGORIES FOR FILTERING ---
@@ -122,11 +118,16 @@ include '../includes/header.php';
                     $thumbnail_url = $base_url . '/' . $thumbnail_path;
                     ?>
                     <div class="col-lg-4 col-md-6 mb-4 gallery-photo" data-aos="zoom-in">
+                        <?php
+                        $title = htmlspecialchars(addslashes($item['title'] ?? 'Untitled'));
+                        $desc = htmlspecialchars(addslashes($item['description'] ?? ''));
+                        $date = !empty($item['event_date']) ? date('F j, Y', strtotime($item['event_date'])) : '';
+                        ?>
                         <div class="gallery-item" onclick="openModal(
                             '<?php echo htmlspecialchars($image_url); ?>', 
-                            '<?php echo htmlspecialchars(addslashes($item['title'])); ?>', 
-                            '<?php echo htmlspecialchars(addslashes($item['description'])); ?>', 
-                            '<?php echo date('F j, Y', strtotime($item['event_date'])); ?>'
+                            '<?php echo $title; ?>', 
+                            '<?php echo $desc; ?>', 
+                            '<?php echo $date; ?>'
                         )">
                             <img src="<?php echo htmlspecialchars($thumbnail_url); ?>" 
                                  alt="<?php echo htmlspecialchars($item['title']); ?>"
@@ -266,8 +267,8 @@ include '../includes/header.php';
         /* Page Header */
         .page-header {
             height: 70vh;
-            background: linear-gradient(rgba(30, 58, 138, 0.8), rgba(30, 58, 138, 0.8)), 
-                        url('https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=1920&h=1080&fit=crop') center/cover;
+            background: linear-gradient(rgba(30, 58, 138, 0.8), rgba(30, 58, 138, 0.8)),
+                        url('<?php echo BASE_URL; ?>/images/gallery.jpg') center/cover;
             display: flex;
             align-items: center;
             justify-content: center;

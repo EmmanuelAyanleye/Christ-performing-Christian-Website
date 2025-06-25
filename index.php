@@ -450,7 +450,7 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
                 <h3 class="font-display mb-3">Our Mission</h3>
                 <p class="mb-4">Christ performing Christian Centre is a vibrant Christian community in the heart of Nigeria, dedicated to spreading God's love, building strong relationships, and serving our community with compassion and purpose.</p>
                 <p class="mb-4">We believe in creating an environment where everyone can experience God's grace, grow in their faith, and find their calling to serve others.</p>
-                <a href="pages/about.php" class="btn btn-primary-custom">Learn More About Us</a>
+                <a href="<?php echo BASE_URL; ?>/about.php" class="btn btn-primary-custom">Learn More About Us</a>
             </div>
         </div>
     </div>
@@ -468,20 +468,22 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
                 <div class="card">
                     <div class="ratio ratio-16x9">
-                        <iframe src="<?php echo get_youtube_embed_url($sermon['youtube_url']); ?>" 
+                        <iframe src="<?php echo embedYouTubeUrl($sermon['youtube_url']); ?>" 
                                 title="<?php echo htmlspecialchars($sermon['title']); ?>" allowfullscreen></iframe>
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title"><?php echo htmlspecialchars($sermon['title']); ?></h5>
-                        <p class="card-text"><?php echo htmlspecialchars(get_excerpt($sermon['description'], 80)); ?></p>
-                        <small class="text-muted"><?php echo format_date($sermon['date']); ?></small>
+                        <a href="<?php echo BASE_URL; ?>/sermon-watch.php?id=<?php echo $sermon['id']; ?>" class="text-decoration-none text-dark">
+                            <h5 class="card-title"><?php echo htmlspecialchars($sermon['title']); ?></h5>
+                            <p class="card-text"><?php echo htmlspecialchars(get_excerpt($sermon['description'], 80)); ?></p>
+                            <small class="text-muted"><?php echo format_date($sermon['date']); ?></small>
+                        </a>
                     </div>
                 </div>
             </div>
             <?php endforeach; ?>
         </div>
         <div class="text-center" data-aos="fade-up">
-            <a href="pages/sermons.php" class="btn btn-primary-custom">View All Sermons</a>
+            <a href="<?php echo BASE_URL; ?>/sermons.php" class="btn btn-primary-custom">View All Sermons</a>
         </div>
     </div>
 </section>
@@ -525,14 +527,14 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="row">
             <?php foreach ($gallery_items as $index => $item): ?>
             <div class="col-md-4 col-sm-6 mb-3" data-aos="zoom-in" data-aos-delay="<?php echo ($index + 1) * 100; ?>">
-                <a href="<?php echo BASE_URL; ?>/pages/gallery.php" class="gallery-item">
+                <a href="<?php echo BASE_URL; ?>/gallery.php" class="gallery-item">
                     <img src="<?php echo htmlspecialchars($item['thumbnail_url'] ?: $item['image_url']); ?>" alt="<?php echo htmlspecialchars($item['title']); ?>">
                 </a>
             </div>
             <?php endforeach; ?>
         </div>
         <div class="text-center" data-aos="fade-up">
-            <a href="<?php echo BASE_URL; ?>/pages/gallery.php" class="btn btn-primary-custom">View Full Gallery</a>
+            <a href="<?php echo BASE_URL; ?>/gallery.php" class="btn btn-primary-custom">View Full Gallery</a>
         </div>
     </div>
 </section>
@@ -547,15 +549,15 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="row">
             <?php foreach($posts as $post): ?>
             <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
-                <div class="card">
-                    <a href="pages/blog-article.php?slug=<?php echo $post['slug']; ?>"><img src="<?php echo htmlspecialchars($post['featured_image']); ?>" 
+                <div class="card h-100">
+                    <a href="<?php echo BASE_URL; ?>/blog-article.php?slug=<?php echo $post['slug']; ?>"><img src="<?php echo htmlspecialchars($post['featured_image']); ?>" 
                          class="card-img-top" alt="<?php echo htmlspecialchars($post['title']); ?>">
-                    <div class="card-body">
-                        <h5 class="card-title"><a href="pages/blog-article.php?slug=<?php echo $post['slug']; ?>" class="text-decoration-none text-dark"><?php echo htmlspecialchars($post['title']); ?></a></h5>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title"><a href="<?php echo BASE_URL; ?>/blog-article.php?slug=<?php echo $post['slug']; ?>" class="text-decoration-none text-dark"><?php echo htmlspecialchars($post['title']); ?></a></h5>
                         <p class="card-text"><?php echo htmlspecialchars($post['excerpt']); ?></p>
-                        <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex justify-content-between align-items-center mt-auto">
                             <small class="text-muted"><?php echo format_date($post['created_at']); ?></small>
-                            <a href="pages/blog-article.php?slug=<?php echo $post['slug']; ?>" class="btn btn-outline-primary btn-sm">Read More</a>
+                            <a href="<?php echo BASE_URL; ?>/blog-article.php?slug=<?php echo $post['slug']; ?>" class="btn btn-outline-primary btn-sm">Read More</a>
                         </div>
                     </div>
                 </div>
@@ -563,7 +565,7 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php endforeach; ?>
         </div>
         <div class="text-center" data-aos="fade-up">
-            <a href="<?php echo BASE_URL; ?>/pages/blog.php" class="btn btn-primary-custom">Read All Posts</a>
+            <a href="<?php echo BASE_URL; ?>/blog.php" class="btn btn-primary-custom">Read All Posts</a>
         </div>
     </div>
 </section>

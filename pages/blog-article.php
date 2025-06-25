@@ -6,7 +6,7 @@ $current_page = 'blog';
 $slug = isset($_GET['slug']) ? trim($_GET['slug']) : '';
 
 if (empty($slug)) {
-    header("Location: " . BASE_URL . "/pages/blog.php");
+    header("Location: " . BASE_URL . "/blog.php");
     exit();
 }
 
@@ -22,7 +22,7 @@ $post = $post_stmt->fetch(PDO::FETCH_ASSOC);
 
 // If post is not found, redirect to blog index
 if (!$post) {
-    header("Location: " . BASE_URL . "/pages/blog.php?error=not_found");
+    header("Location: " . BASE_URL . "/404.php");
     exit();
 }
 
@@ -460,7 +460,7 @@ include '../includes/header.php';
                 <?php else: ?>
                     <div class="alert alert-warning text-center">The article you are looking for does not exist or has been removed.</div>
                     <div class="text-center mt-4">
-                        <a href="<?php echo BASE_URL; ?>/pages/blog.php" class="btn btn-primary">Back to Blog</a>
+                        <a href="<?php echo BASE_URL; ?>/blog.php" class="btn btn-primary">Back to Blog</a>
                     </div>
                 <?php endif; ?>
             </div>
@@ -476,14 +476,14 @@ include '../includes/header.php';
         <div class="row">
             <?php foreach ($recommended_posts as $index => $recommended): ?>
                 <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="<?php echo $index * 100; ?>">
-                    <div class="recommended-post">
+                    <div class="recommended-post h-100">
                         <?php if (!empty($recommended['featured_image'])): ?>
-                            <img src="<?php echo BASE_URL . '/' . htmlspecialchars($recommended['featured_image']); ?>" alt="<?php echo htmlspecialchars($recommended['title']); ?>">
+                            <a href="<?php echo BASE_URL; ?>/blog-article.php?slug=<?php echo htmlspecialchars($recommended['slug']); ?>"><img src="<?php echo BASE_URL . '/' . htmlspecialchars($recommended['featured_image']); ?>" alt="<?php echo htmlspecialchars($recommended['title']); ?>"></a>
                         <?php else: ?>
-                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=200&fit=crop" alt="<?php echo htmlspecialchars($recommended['title']); ?>">
+                            <a href="<?php echo BASE_URL; ?>/blog-article.php?slug=<?php echo htmlspecialchars($recommended['slug']); ?>"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=200&fit=crop" alt="<?php echo htmlspecialchars($recommended['title']); ?>"></a>
                         <?php endif; ?>
                         <div class="recommended-post-content">
-                            <h5><a href="<?php echo BASE_URL; ?>/pages/blog-article.php?slug=<?php echo htmlspecialchars($recommended['slug']); ?>" class="text-decoration-none text-dark"><?php echo htmlspecialchars($recommended['title']); ?></a></h5>
+                            <h5><a href="<?php echo BASE_URL; ?>/blog-article.php?slug=<?php echo htmlspecialchars($recommended['slug']); ?>" class="text-decoration-none text-dark"><?php echo htmlspecialchars($recommended['title']); ?></a></h5>
                             <p class="text-muted small mb-2"><?php echo htmlspecialchars($recommended['author_name']); ?> • <?php echo date('M j, Y', strtotime($recommended['created_at'])); ?></p>
                             <p class="text-muted"><?php echo htmlspecialchars(substr($recommended['excerpt'], 0, 100)); ?>...</p>
                         </div>

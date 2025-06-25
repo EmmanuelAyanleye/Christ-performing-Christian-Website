@@ -3,19 +3,22 @@ require_once __DIR__ . '/../includes/config.php';
 $current_page = 'sermons'; 
 $search_term = $_GET['search'] ?? '';
 $filter_series = $_GET['series'] ?? '';
-$sort_by = $_GET['sort'] ?? 'recent';
+$sort_by = $_GET['sort'] ?? 'newest'; // Changed default to 'newest' for clarity
 
 $where_clauses = [];
-$params = [];
+$params_for_execute = []; // Use a single array for all positional parameters
 
 if (!empty($search_term)) {
-    $where_clauses[] = "(title LIKE :search OR description LIKE :search OR speaker LIKE :search OR series LIKE :search)";
-    $params[':search'] = '%' . $search_term . '%';
+    $where_clauses[] = "(title LIKE ? OR description LIKE ? OR speaker LIKE ? OR series LIKE ?)";
+    $params_for_execute[] = '%' . $search_term . '%';
+    $params_for_execute[] = '%' . $search_term . '%';
+    $params_for_execute[] = '%' . $search_term . '%';
+    $params_for_execute[] = '%' . $search_term . '%';
 }
 
 if (!empty($filter_series)) {
-    $where_clauses[] = "series = :series";
-    $params[':series'] = $filter_series;
+    $where_clauses[] = "series = ?";
+    $params_for_execute[] = $filter_series;
 }
 
 $where_sql = '';
@@ -23,40 +26,35 @@ if (!empty($where_clauses)) {
     $where_sql = ' WHERE ' . implode(' AND ', $where_clauses);
 }
 
-$order_by_sql = 'ORDER BY date DESC';
+$order_by_sql = 'ORDER BY created_at DESC'; // Default sort by newest
 if ($sort_by === 'popular') {
     $order_by_sql = 'ORDER BY views DESC';
 } elseif ($sort_by === 'title_asc') {
     $order_by_sql = 'ORDER BY title ASC';
+} elseif ($sort_by === 'oldest') {
+    $order_by_sql = 'ORDER BY created_at ASC';
 }
-
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $per_page = 12; // Changed from 6 to 12
 $offset = ($page - 1) * $per_page;
 
 $total_sermons_sql = "SELECT COUNT(*) FROM sermons" . $where_sql;
-$total_sermons_stmt = $conn->prepare($total_sermons_sql);
-$total_sermons_stmt->execute($params);
+$total_sermons_stmt = $conn->prepare($total_sermons_sql); // Prepare statement for total count
+$total_sermons_stmt->execute($params_for_execute); // Execute with collected parameters
 $total_sermons = $total_sermons_stmt->fetchColumn();
 $total_pages = ceil($total_sermons / $per_page);
 
-$sermons_sql = "SELECT * FROM sermons " . $where_sql . " " . $order_by_sql . " LIMIT :offset, :per_page";
+$sermons_sql = "SELECT * FROM sermons " . $where_sql . " " . $order_by_sql . " LIMIT ?, ?"; // Use positional placeholders for LIMIT
 $sermons_stmt = $conn->prepare($sermons_sql);
 
-// Bind the WHERE clause parameters from the $params array
-foreach ($params as $key => $val) {
-    $sermons_stmt->bindValue($key, $val);
-}
-
-// Manually bind the LIMIT parameters as integers, which is required for LIMIT clauses.
-$sermons_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-$sermons_stmt->bindValue(':per_page', $per_page, PDO::PARAM_INT);
-
-$sermons_stmt->execute(); // Execute the statement after binding all parameters
+// Append LIMIT parameters to the same array
+$params_for_execute[] = $offset;
+$params_for_execute[] = $per_page;
+$sermons_stmt->execute($params_for_execute); // Execute with all positional parameters
 $sermons = $sermons_stmt->fetchAll(PDO::FETCH_ASSOC); 
 
-$all_series_sql = "SELECT DISTINCT series FROM sermons WHERE series IS NOT NULL AND series != '' ORDER BY series ASC";
-$all_series = $conn->query($all_series_sql)->fetchAll(PDO::FETCH_ASSOC);
+$all_series_sql = "SELECT series, SUM(views) as total_views FROM sermons WHERE series IS NOT NULL AND series != '' GROUP BY series ORDER BY total_views DESC LIMIT 3";
+$all_series = $conn->query($all_series_sql)->fetchAll(PDO::FETCH_ASSOC); // Fetch top 3 series by views
 
 $page_title = "Sermons";
 $page_description = "Watch and listen to inspiring sermons from Christ performing Christian Centre. Search our sermon library and grow in your faith.";
@@ -133,8 +131,8 @@ include '../includes/header.php';
         /* Page Header */
         .page-header {
             height: 70vh;
-            background: linear-gradient(rgba(30, 58, 138, 0.8), rgba(30, 58, 138, 0.8)), 
-                        url('https://images.unsplash.com/photo-1438032005730-c779502df39b?w=1920&h=1080&fit=crop') center/cover;
+            background: linear-gradient(rgba(30, 58, 138, 0.8), rgba(30, 58, 138, 0.8)),
+                        url('<?php echo BASE_URL; ?>/images/sermon.jpg') center/cover;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -339,7 +337,7 @@ include '../includes/header.php';
 <section class="section-padding">
     <div class="container">
         <div class="filter-buttons text-center" data-aos="fade-up">
-            <a href="sermons.php" class="btn filter-btn <?php echo empty($_GET['sort']) && empty($_GET['series']) ? 'active' : ''; ?>">All Sermons</a>
+            <a href="sermons.php" class="btn filter-btn <?php echo (empty($_GET['sort']) || $_GET['sort'] === 'newest') && empty($_GET['series']) && empty($_GET['search']) ? 'active' : ''; ?>">All Sermons</a>
             <!-- Removed "Recent" filter button as it's redundant with default sort by date DESC -->
             <a href="sermons.php?sort=popular" class="btn filter-btn <?php echo $sort_by === 'popular' ? 'active' : ''; ?>">Popular</a>
             <?php foreach ($all_series as $series_item): ?>

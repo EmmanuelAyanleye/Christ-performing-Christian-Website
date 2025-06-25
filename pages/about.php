@@ -76,8 +76,8 @@ include '../includes/header.php';
         /* Page Header */
         .page-header {
             height: 60vh;
-            background: linear-gradient(rgba(30, 58, 138, 0.8), rgba(30, 58, 138, 0.8)), 
-                        url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&h=1080&fit=crop') center/cover;
+            background: linear-gradient(rgba(30, 58, 138, 0.8), rgba(30, 58, 138, 0.8)),
+                        url('<?php echo BASE_URL; ?>/images/about.jpeg') center/cover;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -344,9 +344,8 @@ include '../includes/header.php';
                 <div class="mt-4">
                     <h5>Follow Us</h5>
                     <div class="social-icons">
-                        <a href="https://facebook.com" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://instagram.com" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="https://twitter.com" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.facebook.com/share/16UDk38kkw/" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/christperforming?igsh=MWJoeXJkMHBlYzZicA==" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
                         <a href="https://youtube.com" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>

@@ -227,10 +227,8 @@ include 'partials/sidebar.php';
                         <select class="form-select" name="category" required>
                             <option value="">Select Category</option>
                             <option value="Sunday Service">Sunday Service</option>
-                            <option value="Youth Ministry">Youth Ministry</option>
+                            <option value="Youth Ministry">Youth Church</option>
                             <option value="Community Events">Community Events</option>
-                            <option value="Baptisms">Baptisms</option>
-                            <option value="Holidays">Holidays</option>
                         </select>
                     </div>
                     <div class="col-md-6">

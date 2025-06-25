@@ -12,7 +12,7 @@ $stmt->execute([$sermonId]);
 $sermon = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$sermon) {
-    header('Location: sermons.php');
+    header('Location: ' . BASE_URL . '/404.php');
     exit();
 }
 
@@ -420,9 +420,9 @@ include '../includes/header.php';
                         if (!empty($recommended)): 
                             foreach ($recommended as $rec): ?>
                             <div class="recommended-sermon">
-                                <img src="<?php echo htmlspecialchars($rec['thumbnail_url'] ?: '../assets/images/default-sermon.jpg'); ?>" alt="<?php echo htmlspecialchars($rec['title']); ?>">
+                                <a href="<?php echo BASE_URL; ?>/sermon-watch.php?id=<?php echo $rec['id']; ?>"><img src="<?php echo htmlspecialchars($rec['thumbnail_url'] ?: '../assets/images/default-sermon.jpg'); ?>" alt="<?php echo htmlspecialchars($rec['title']); ?>"></a>
                                 <div class="recommended-sermon-content">
-                                    <h6><a href="sermon-watch.php?id=<?php echo $rec['id']; ?>" class="text-decoration-none text-dark"><?php echo htmlspecialchars($rec['title']); ?></a></h6>
+                                    <h6><a href="<?php echo BASE_URL; ?>/sermon-watch.php?id=<?php echo $rec['id']; ?>" class="text-decoration-none text-dark"><?php echo htmlspecialchars($rec['title']); ?></a></h6>
                                     <p class="text-muted"><?php echo htmlspecialchars($rec['speaker']); ?></p>
                                     <p class="text-muted"><?php echo htmlspecialchars($rec['duration']); ?> • <?php echo number_format($rec['views']); ?> views</p>
                                 </div>

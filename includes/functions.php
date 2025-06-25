@@ -32,4 +32,20 @@ function embedYouTubeUrl($url) {
     return "https://www.youtube.com/embed/" . $id;
 }
 
+/**
+ * Creates a short excerpt from a string.
+ * @param string $text The input string.
+ * @param int $length The maximum length of the excerpt.
+ * @return string The truncated string with an ellipsis.
+ */
+function get_excerpt($text, $length = 100) {
+    $text = strip_tags($text);
+    if (mb_strlen($text) > $length) {
+        $text = mb_substr($text, 0, $length);
+        $text = mb_substr($text, 0, mb_strrpos($text, ' ')); // Cut to the last word to avoid breaking words
+        $text .= '...';
+    }
+    return $text;
+}
+
 ?>

@@ -12,19 +12,19 @@
                     <a class="nav-link <?php echo (isset($current_page) && $current_page === 'home') ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/index.php">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?php echo (isset($current_page) && $current_page === 'about') ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/pages/about.php">About</a>
+                    <a class="nav-link <?php echo (isset($current_page) && $current_page === 'about') ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/about.php">About</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?php echo (isset($current_page) && $current_page === 'sermons') ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/pages/sermons.php">Sermons</a>
+                    <a class="nav-link <?php echo (isset($current_page) && $current_page === 'sermons') ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/sermons.php">Sermons</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="<?php echo BASE_URL; ?>/index.php#events">Events</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?php echo (isset($current_page) && $current_page === 'gallery') ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/pages/gallery.php">Gallery</a>
+                    <a class="nav-link <?php echo (isset($current_page) && $current_page === 'gallery') ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/gallery.php">Gallery</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?php echo (isset($current_page) && $current_page === 'blog') ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/pages/blog.php">Blog</a>
+                    <a class="nav-link <?php echo (isset($current_page) && $current_page === 'blog') ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/blog.php">Blog</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="<?php echo BASE_URL; ?>/index.php#contact">Contact</a>

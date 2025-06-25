@@ -41,20 +41,22 @@ $offset = ($page - 1) * $per_page;
 
 // --- BUILD QUERY ---
 $base_sql = "FROM blog_posts p JOIN users u ON p.author_id = u.id WHERE p.status = 'published'";
-$where_clauses = [];
-$params = [];
+$where_clauses = []; // Stores parts of the WHERE clause
+$params_for_execute = []; // Stores parameters for PDOStatement::execute() in order
 
 if (!empty($search_term)) {
-    $where_clauses[] = "(p.title LIKE :search OR p.content LIKE :search OR u.full_name LIKE :search)";
-    $params[':search'] = '%' . $search_term . '%';
+    $where_clauses[] = "(p.title LIKE ? OR p.content LIKE ? OR u.full_name LIKE ?)"; // Positional placeholders
+    $params_for_execute[] = '%' . $search_term . '%';
+    $params_for_execute[] = '%' . $search_term . '%';
+    $params_for_execute[] = '%' . $search_term . '%';
 }
 if (!empty($filter_category)) {
-    $where_clauses[] = "p.category = :category";
-    $params[':category'] = $filter_category;
+    $where_clauses[] = "p.category = ?"; // Positional placeholder
+    $params_for_execute[] = $filter_category;
 }
 if (!empty($filter_tag)) {
-    $where_clauses[] = "FIND_IN_SET(:tag, p.tags)";
-    $params[':tag'] = $filter_tag;
+    $where_clauses[] = "FIND_IN_SET(?, p.tags)"; // Positional placeholder
+    $params_for_execute[] = $filter_tag;
 }
 
 $where_sql = '';
@@ -65,19 +67,20 @@ if (!empty($where_clauses)) {
 // --- TOTAL COUNT ---
 $total_posts_sql = "SELECT COUNT(*) " . $base_sql . $where_sql;
 $total_posts_stmt = $conn->prepare($total_posts_sql);
-$total_posts_stmt->execute($params);
+$total_posts_stmt->execute($params_for_execute); // Execute with the collected parameters
 $total_posts = $total_posts_stmt->fetchColumn();
 $total_pages = ceil($total_posts / $per_page);
 
 // --- FETCH POSTS FOR CURRENT PAGE ---
-$posts_sql = "SELECT p.*, u.full_name as author_name " . $base_sql . $where_sql . " ORDER BY p.created_at DESC LIMIT :offset, :per_page";
+$posts_sql = "SELECT p.*, u.full_name as author_name " . $base_sql . $where_sql . " ORDER BY p.created_at DESC LIMIT ?, ?"; // Positional placeholders for LIMIT
 $posts_stmt = $conn->prepare($posts_sql);
-foreach ($params as $key => $val) {
-    $posts_stmt->bindValue($key, $val);
-}
-$posts_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-$posts_stmt->bindValue(':per_page', $per_page, PDO::PARAM_INT);
-$posts_stmt->execute();
+
+// Combine WHERE parameters with LIMIT parameters into a single array
+$all_params_for_posts_query = $params_for_execute;
+$all_params_for_posts_query[] = $offset;
+$all_params_for_posts_query[] = $per_page;
+
+$posts_stmt->execute($all_params_for_posts_query); // Execute with all positional parameters
 $posts = $posts_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // --- SIDEBAR DATA ---
@@ -172,8 +175,8 @@ include '../includes/header.php';
         /* Page Header */
         .page-header {
             height: 70vh;
-            background: linear-gradient(rgba(30, 58, 138, 0.8), rgba(30, 58, 138, 0.8)), 
-                        url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1920&h=1080&fit=crop') center/cover;
+            background: linear-gradient(rgba(30, 58, 138, 0.8), rgba(30, 58, 138, 0.8)),
+                        url('<?php echo BASE_URL; ?>/images/blog.jpg') center/cover;
             display: flex;
             align-items: center;
             justify-content: center;

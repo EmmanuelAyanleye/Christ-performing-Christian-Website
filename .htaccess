@@ -1,0 +1,14 @@
+RewriteEngine On
+RewriteBase /grace-fellowship-website/
+
+# Externally redirect direct requests for /pages/ files to the root
+RewriteCond %{THE_REQUEST} \s/grace-fellowship-website/pages/([^\s]+) [NC]
+RewriteRule ^pages/(.*)$ $1 [R=301,L]
+
+# Internally rewrite requests from root to /pages if the file exists there
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}/grace-fellowship-website/pages/$1 -f
+RewriteRule ^(.*)$ pages/$1 [L]
+
+ErrorDocument 404 /grace-fellowship-website/404.php

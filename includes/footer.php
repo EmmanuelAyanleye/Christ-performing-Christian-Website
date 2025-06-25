@@ -1,4 +1,9 @@
     <!-- Footer -->
+     <style>
+        .footer a:hover {
+            color: white;
+        }
+     </style>
     <footer class="footer">
         <div class="container">
             <div class="row">
@@ -6,14 +11,11 @@
                     <h5 class="">Christ performing Christian Centre</h5>
                     <p class="mb-3">Building Faith, Strengthening Community, Serving with Love</p>
                     <div class="social-icons">
-                        <a href="https://facebook.com" target="_blank" title="Facebook">
+                        <a href="https://www.facebook.com/share/16UDk38kkw/" target="_blank" title="Facebook">
                             <i class="fab fa-facebook-f"></i>
                         </a>
-                        <a href="https://instagram.com" target="_blank" title="Instagram">
+                        <a href="https://www.instagram.com/christperforming?igsh=MWJoeXJkMHBlYzZicA==" target="_blank" title="Instagram">
                             <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="https://twitter.com" target="_blank" title="Twitter">
-                            <i class="fab fa-twitter"></i>
                         </a>
                         <a href="https://youtube.com" target="_blank" title="YouTube">
                             <i class="fab fa-youtube"></i>
@@ -24,11 +26,11 @@
                     <h5>Quick Links</h5>
                     <ul class="list-unstyled">
                         <li class="mb-2"><a href="<?php echo BASE_URL; ?>/index.php">Home</a></li>
-                        <li class="mb-2"><a href="<?php echo BASE_URL; ?>/pages/about.php">About Us</a></li>
-                        <li class="mb-2"><a href="<?php echo BASE_URL; ?>/pages/sermons.php">Sermons</a></li>
+                        <li class="mb-2"><a href="<?php echo BASE_URL; ?>/about.php">About Us</a></li>
+                        <li class="mb-2"><a href="<?php echo BASE_URL; ?>/sermons.php">Sermons</a></li>
                         <li class="mb-2"><a href="<?php echo BASE_URL; ?>/index.php#events">Events</a></li> 
-                        <li class="mb-2"><a href="<?php echo BASE_URL; ?>/pages/gallery.php">Gallery</a></li>
-                        <li class="mb-2"><a href="<?php echo BASE_URL; ?>/pages/blog.php">Blog</a></li>
+                        <li class="mb-2"><a href="<?php echo BASE_URL; ?>/gallery.php">Gallery</a></li>
+                        <li class="mb-2"><a href="<?php echo BASE_URL; ?>/blog.php">Blog</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
