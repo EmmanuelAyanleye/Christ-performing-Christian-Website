@@ -51,6 +51,10 @@ include __DIR__ . '/partials/sidebar.php';
         </div>
     </div>
 
+    <?php if (isset($_GET['error']) && $_GET['error'] === 'access_denied'): ?>
+        <div class="alert alert-danger">You do not have permission to access that page.</div>
+    <?php endif; ?>
+
     <!-- Stats Cards -->
     <div class="row mb-4">
         <div class="col-md-3">
@@ -135,7 +139,7 @@ include __DIR__ . '/partials/sidebar.php';
                 <div class="card-header"><h5>System Info</h5></div>
                 <div class="card-body">
                     <p><strong>Last Login:</strong> <span id="lastLogin">Just now</span></p>
-                    <p><strong>PHP Version:</strong> <?php echo phpversion(); ?></p>
+                    <!-- <p><strong>PHP Version:</strong> <?php echo phpversion(); ?></p> -->
                 </div>
             </div>
         </div>

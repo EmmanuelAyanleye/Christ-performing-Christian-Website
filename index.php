@@ -120,56 +120,114 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             font-family: 'Poppins', sans-serif;
             line-height: 1.6;
             color: var(--text-dark);
+            overflow-x: hidden;
         }
 
         .font-display {
             font-family: 'Playfair Display', serif;
         }
 
-        /* Navigation Styles */
-        .navbar {
-            background: rgba(255, 255, 255, 0.95) !important;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+        /* Prevent horizontal overflow */
+        html, body {
+            overflow-x: hidden;
+            width: 100vw;
         }
 
-        .navbar-brand {
-            font-weight: 700;
-            color: var(--primary-color) !important;
-            font-size: 1.5rem;
+        /* Make all images responsive */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
         }
 
-        .nav-link {
-            font-weight: 500;
-            color: var(--text-dark) !important;
-            transition: color 0.3s ease;
-            position: relative;
-        }
-
-        .nav-link:hover {
-            color: var(--primary-color) !important;
-        }
-
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 50%;
-            background-color: var(--secondary-color);
-            transition: all 0.3s ease;
-        }
-
-        .nav-link:hover::after {
+        /* Container and row fixes */
+        .container {
             width: 100%;
-            left: 0;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-left: 15px;
+            padding-right: 15px;
+            box-sizing: border-box;
+        }
+        .row {
+            margin-left: -15px;
+            margin-right: -15px;
+        }
+
+        /* Remove negative margins on small screens */
+        @media (max-width: 575.98px) {
+            .row {
+                margin-left: 0;
+                margin-right: 0;
+            }
+        }
+
+        /* Section padding fix */
+        .section-padding {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        /* Gallery and card images */
+        .gallery-item img,
+        .card-img-top {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            display: block;
+            border-radius: 10px;
+        }
+
+        /* Fix input group overflow in newsletter */
+        .input-group {
+            flex-wrap: nowrap;
+            width: 100%;
+        }
+        .input-group .form-control {
+            min-width: 0;
+        }
+
+        /* Responsive adjustments for small screens */
+        @media (max-width: 767.98px) {
+            .section-padding {
+                padding-left: 0;
+                padding-right: 0;
+            }
+            .hero-content h1 {
+                font-size: 1.5rem;
+            }
+            .card-img-top,
+            .gallery-item img {
+                height: 150px;
+            }
+            .testimonial-card {
+                margin: 0.5rem;
+                padding: 1rem;
+            }
+            .contact-form,
+            .contact-info {
+                padding: 1rem;
+            }
+        }
+
+        /* Prevent newsletter input from overflowing */
+        @media (max-width: 575.98px) {
+            .input-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .input-group .form-control,
+            .input-group .btn {
+                width: 100%;
+                border-radius: 10px !important;
+            }
         }
 
         /* Hero Section */
         .hero {
             height: 100vh;
+            min-height: 600px;
+            max-height: 1200px;
             background: linear-gradient(rgba(30, 58, 138, 0.7), rgba(30, 58, 138, 0.7)), 
                         url('https://images.unsplash.com/photo-1438032005730-c779502df39b?w=1920&h=1080&fit=crop') center/cover;
             display: flex;
@@ -178,6 +236,7 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             text-align: center;
             color: white;
             position: relative;
+            padding-top: 70px; /* Account for fixed navbar */
         }
 
         .hero-content h1 {
@@ -185,12 +244,16 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             font-weight: 700;
             margin-bottom: 1rem;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            line-height: 1.2;
         }
 
         .hero-content p {
             font-size: 1.3rem;
             margin-bottom: 2rem;
             opacity: 0.9;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .btn-primary-custom {
@@ -202,6 +265,7 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
+            color: var(--primary-color);
         }
 
         .btn-primary-custom:hover {
@@ -226,6 +290,7 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             font-weight: 600;
             color: var(--primary-color);
             margin-bottom: 1rem;
+            line-height: 1.2;
         }
 
         .section-title p {
@@ -242,6 +307,7 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             overflow: hidden;
+            height: 100%;
         }
 
         .card:hover {
@@ -280,6 +346,14 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             box-shadow: 0 0 0 0.2rem rgba(30, 58, 138, 0.25);
         }
 
+        .contact-info {
+          padding: 2rem;
+          background: white;
+          border-radius: 15px;
+          box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+          height: 100%;
+        }
+
         /* Testimonials */
         .testimonial-card {
             background: white;
@@ -288,6 +362,7 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             text-align: center;
             margin: 1rem;
+            height: calc(100% - 2rem);
         }
 
         .testimonial-avatar {
@@ -296,18 +371,10 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             border-radius: 50%;
             margin: 0 auto 1rem;
             object-fit: cover;
-        }
-
-        /* Testimonials Carousel */
-        .testimonial-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin: 0 auto 1rem;
             border: 3px solid var(--secondary-color);
         }
 
+        /* Testimonials Carousel */
         .carousel-controls {
             position: relative;
             z-index: 1;
@@ -325,16 +392,6 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             border-radius: 50%;
             padding: 15px;
             background-size: 60%;
-        }
-
-        .testimonial-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            margin: 0 10px;
-            height: 100%;
         }
 
         /* Gallery */
@@ -414,23 +471,73 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             box-shadow: 0 5px 15px rgba(251, 191, 36, 0.3);
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
+        /* Responsive Adjustments */
+        @media (max-width: 1199.98px) {
+            .hero-content h1 {
+                font-size: 3rem;
+            }
+            
+            .section-padding {
+                padding: 60px 0;
+            }
+        }
+
+        @media (max-width: 991.98px) {
             .hero-content h1 {
                 font-size: 2.5rem;
             }
             
+            .hero-content p {
+                font-size: 1.1rem;
+            }
+            
             .section-title h2 {
-                font-size: 2rem;
+                font-size: 2.2rem;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .section-padding {
+                padding-left: 0;
+                padding-right: 0;
+            }
+            .hero-content h1 {
+                font-size: 1.5rem;
+            }
+            .card-img-top,
+            .gallery-item img {
+                height: 150px;
+            }
+            .testimonial-card {
+                margin: 0.5rem;
+                padding: 1rem;
+            }
+            .contact-form,
+            .contact-info {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .input-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .input-group .form-control,
+            .input-group .btn {
+                width: 100%;
+                border-radius: 10px !important;
             }
         }
     </style>
 <!-- Hero Section -->
 <section id="home" class="hero">
-    <div class="hero-content" data-aos="fade-up">
-        <h1 class="font-display">Welcome to Christ performing Christian Centre</h1>
-        <p>Building Faith, Strengthening Community, Serving with Love</p>
-        <a href="#about" class="btn btn-primary-custom">Discover Our Story</a>
+    <div class="container">
+        <div class="hero-content" data-aos="fade-up">
+            <h1 class="font-display">Welcome to Christ performing Christian Centre</h1>
+            <p>Building Faith, Strengthening Community, Serving with Love</p>
+            <a href="#about" class="btn btn-primary-custom">Discover Our Story</a>
+        </div>
     </div>
 </section>
 
@@ -442,7 +549,7 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             <p>A community where faith grows, hearts are transformed, and lives are touched by God's love</p>
         </div>
         <div class="row align-items-center">
-            <div class="col-lg-6" data-aos="fade-right">
+            <div class="col-lg-6 mb-4 mb-lg-0" data-aos="fade-right">
                 <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop" 
                      alt="Church Community" class="img-fluid rounded shadow">
             </div>
@@ -514,6 +621,9 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
             <?php endforeach; ?>
         </div>
+        <div class="text-center" data-aos="fade-up">
+            <a href="<?php echo BASE_URL; ?>/events.php" class="btn btn-primary-custom">View All Events</a>
+        </div>
     </div>
 </section>
 
@@ -526,9 +636,9 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
         <div class="row">
             <?php foreach ($gallery_items as $index => $item): ?>
-            <div class="col-md-4 col-sm-6 mb-3" data-aos="zoom-in" data-aos-delay="<?php echo ($index + 1) * 100; ?>">
+            <div class="col-md-4 col-sm-6 mb-4" data-aos="zoom-in" data-aos-delay="<?php echo ($index + 1) * 100; ?>">
                 <a href="<?php echo BASE_URL; ?>/gallery.php" class="gallery-item">
-                    <img src="<?php echo htmlspecialchars($item['thumbnail_url'] ?: $item['image_url']); ?>" alt="<?php echo htmlspecialchars($item['title']); ?>">
+                    <img src="<?php echo htmlspecialchars($item['thumbnail_url'] ?: $item['image_url']); ?>" alt="<?php echo htmlspecialchars($item['title']); ?>" class="img-fluid">
                 </a>
             </div>
             <?php endforeach; ?>
@@ -550,8 +660,10 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php foreach($posts as $post): ?>
             <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
                 <div class="card h-100">
-                    <a href="<?php echo BASE_URL; ?>/blog-article.php?slug=<?php echo $post['slug']; ?>"><img src="<?php echo htmlspecialchars($post['featured_image']); ?>" 
-                         class="card-img-top" alt="<?php echo htmlspecialchars($post['title']); ?>">
+                    <a href="<?php echo BASE_URL; ?>/blog-article.php?slug=<?php echo $post['slug']; ?>">
+                        <img src="<?php echo htmlspecialchars($post['featured_image']); ?>" 
+                             class="card-img-top" alt="<?php echo htmlspecialchars($post['title']); ?>">
+                    </a>
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title"><a href="<?php echo BASE_URL; ?>/blog-article.php?slug=<?php echo $post['slug']; ?>" class="text-decoration-none text-dark"><?php echo htmlspecialchars($post['title']); ?></a></h5>
                         <p class="card-text"><?php echo htmlspecialchars($post['excerpt']); ?></p>
@@ -656,7 +768,7 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="row">
             <!-- Contact Form -->
             <div class="col-md-6 mb-4" data-aos="fade-right">
-                <div class="contact-form bg-white p-4 rounded-3 shadow">
+                <div class="contact-form">
                     <h4 class="mb-4">Send us a Message</h4>
                     <?php if (!empty($contact_message)) echo $contact_message; ?>
                     <form action="<?php echo BASE_URL; ?>/index.php#contact" method="POST">
@@ -682,11 +794,11 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             
             <!-- Contact Info -->
             <div class="col-md-6 mb-4" data-aos="fade-left">
-                <div class="contact-info p-4 rounded-3 h-100">
+                <div class="contact-info">
                     <h4 class="mb-4">Contact Information</h4>
                     <div class="contact-item mb-4 d-flex align-items-start">
                         <i class="fas fa-map-marker-alt text-primary fa-fw me-3 mt-1"></i>
-                        <div><strong>Address</strong><br>23 Ayofayemi Street, off Princess Abiola Street, Nobex bus stop, Idimu Ikotun Road, Lagos, Nigeria</div>
+                        <div><strong>Address</strong><br>23 Ayofayemi Street, off Princess Abiola Street, Nobex bus stop, Idimu Ikotun Road, Lagos, Nigeria</div>
                     </div>
                     <div class="contact-item mb-4 d-flex align-items-start">
                         <i class="fas fa-phone text-primary fa-fw me-3 mt-1"></i>
@@ -710,7 +822,7 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
 <section id="newsletter" class="section-padding bg-primary text-white">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-lg-6" data-aos="fade-right">
+            <div class="col-lg-6 mb-4 mb-lg-0" data-aos="fade-right">
                 <h3 class="font-display mb-3">Stay Connected</h3>
                 <p class="mb-lg-0">Subscribe to our newsletter to receive updates about upcoming events, sermons, and church activities. Join our community and never miss an important announcement.</p>
             </div>

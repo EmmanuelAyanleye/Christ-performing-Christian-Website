@@ -58,13 +58,14 @@ include '../includes/header.php';
 ?>
 
 <!-- Page Header -->
-<section class="page-header">
-    <div class="container">
-        <div data-aos="fade-up">
-            <h1 class="font-display">Photo Gallery</h1>
-            <p>Moments of worship, fellowship, and community life</p>
-        </div>
+<section class="page-header" style="background: linear-gradient(rgba(30, 58, 138, 0.8), rgba(30, 58, 138, 0.8)),
+                        url('<?php echo BASE_URL; ?>/images/gallery.jpg') center/cover;">
+  <div class="container">
+    <div>
+      <h1>Photo Gallery</h1>
+      <p>Moments of worship, fellowship, and community life</p>
     </div>
+  </div>
 </section>
 
 <!-- Search Section -->
@@ -221,68 +222,106 @@ include '../includes/header.php';
 
         .font-display {
             font-family: 'Playfair Display', serif;
-        }
+        }     
 
-        /* Navigation Styles */
-        .navbar {
-            background: rgba(255, 255, 255, 0.95) !important;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
+.hero,
+.page-header {
+    min-height: 70vh;
+    max-height: 80vh;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    position: relative;
+    padding-top: 70px; 
+    padding-left: 0;
+    padding-right: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
 
-        .navbar-brand {
-            font-weight: 700;
-            color: var(--primary-color) !important;
-            font-size: 1.5rem;
-        }
 
-        .nav-link {
-            font-weight: 500;
-            color: var(--text-dark) !important;
-            transition: color 0.3s ease;
-            position: relative;
-        }
 
-        .nav-link:hover {
-            color: var(--primary-color) !important;
-        }
-
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 50%;
-            background-color: var(--secondary-color);
-            transition: all 0.3s ease;
-        }
-
-        .nav-link:hover::after {
+        /* Container and row fixes */
+        .container {
             width: 100%;
-            left: 0;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-left: 15px;
+            padding-right: 15px;
+            box-sizing: border-box;
         }
 
-        /* Page Header */
-        .page-header {
-            height: 70vh;
-            background: linear-gradient(rgba(30, 58, 138, 0.8), rgba(30, 58, 138, 0.8)),
-                        url('<?php echo BASE_URL; ?>/images/gallery.jpg') center/cover;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: white;
-        }
+.hero .container,
+.page-header .container {
+    width: 100%;
+    max-width: 1200px;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin: 0 auto;
+}
 
-        .page-header h1 {
-            margin-top: 76px;
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
+.hero-content,
+.page-header > .container > div {
+    width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+.hero h1,
+.page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    line-height: 1.2;
+}
+
+.hero p,
+.page-header p {
+    font-size: 1.15rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.92;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media (max-width: 991.98px) {
+    .hero,
+    .page-header {
+        min-height: 40vh;
+        padding-top: 70px;
+    }
+    .hero h1,
+    .page-header h1 {
+        font-size: 2rem;
+    }
+    .hero p,
+    .page-header p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .hero,
+    .page-header {
+        min-height: 50vh;
+        padding-top: 55px;
+    }
+    .hero h1,
+    .page-header h1 {
+        font-size: 1.2rem;
+    }
+    .hero p,
+    .page-header p {
+        font-size: 0.95rem;
+    }
+}
 
         /* Search Bar */
         .search-section {
@@ -394,6 +433,23 @@ include '../includes/header.php';
         .filter-btn:hover,
         .filter-btn.active {
             background: var(--primary-color);
+
+        @media (max-width: 768px) {
+            .page-header h1 {font-size: 2.5rem;}
+        }
+        /* Tablet specific adjustments */
+        @media (min-width: 769px) and (max-width: 992px) {
+            .gallery-item img {
+                height: 250px; /* Adjust image height */
+            }
+            .gallery-overlay {
+                padding: 1rem; /* Adjust overlay padding */
+            }
+            .gallery-overlay h5 { font-size: 1.2rem; }
+            .gallery-overlay p { font-size: 0.9rem; }
+            .filter-btn { padding: 6px 15px; } /* Slightly smaller filter buttons */
+            .page-header h1 {font-size: 2.8rem;} /* Adjust header size for tablets */
+        }
             color: white;
         }
 

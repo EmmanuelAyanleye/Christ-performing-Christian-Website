@@ -1,12 +1,9 @@
 <?php
 require_once '../includes/config.php';
-require_once '../includes/functions.php';
+require_once __DIR__ . '/partials/session_auth.php';
 
-if (session_status() === PHP_SESSION_NONE) session_start();
-if (!isset($_SESSION['admin_logged_in'])) {
-    header('Location: login.php');
-    exit();
-}
+// This page is for super admins only
+require_super_admin();
 
 $message = '';
 

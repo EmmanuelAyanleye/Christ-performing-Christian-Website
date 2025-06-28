@@ -7,7 +7,7 @@
  * @return mixed The sanitized data.
  */
 function sanitize_input($data) {
-    return htmlspecialchars(strip_tags(trim($data)));
+    return strip_tags(trim($data));
 }
 
 /**

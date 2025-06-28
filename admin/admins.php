@@ -1,13 +1,9 @@
 <?php
 require_once '../includes/config.php';
-require_once '../includes/functions.php';
-if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/partials/session_auth.php';
 
-// Check auth
-if (!isset($_SESSION['admin_logged_in'])) {
-    header('Location: login.php');
-    exit();
-}
+// This page is for super admins only
+require_super_admin();
 
 $message = '';
 
@@ -39,27 +35,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_admin'])) {
     $status = strtolower(sanitize_input($_POST['status']));
     $password = $_POST['password'] ? password_hash($_POST['password'], PASSWORD_BCRYPT) : null;
 
-    $existingCheck = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
-    $existingCheck->execute([$email, $id]);
-    if ($existingCheck->rowCount() > 0) {
-        $message = '<div class="alert alert-danger">Another admin already uses this email!</div>';
-    } else {
-        if ($password) {
-            $stmt = $pdo->prepare("UPDATE users SET full_name=?, email=?, role=?, status=?, password=? WHERE id=?");
-            $stmt->execute([$name, $email, $role, $status, $password, $id]);
-        } else {
-            $stmt = $pdo->prepare("UPDATE users SET full_name=?, email=?, role=?, status=? WHERE id=?");
-            $stmt->execute([$name, $email, $role, $status, $id]);
+    // Prevent demoting the last super admin
+    $currentUserStmt = $pdo->prepare("SELECT role FROM users WHERE id = ?");
+    $currentUserStmt->execute([$id]);
+    $currentUserRole = $currentUserStmt->fetchColumn();
+
+    if ($currentUserRole === 'super_admin' && $role !== 'super_admin') {
+        $superAdminCountStmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'super_admin'");
+        if ($superAdminCountStmt->fetchColumn() <= 1) {
+            $message = '<div class="alert alert-danger">Cannot demote the last Super Admin!</div>';
         }
-        $message = '<div class="alert alert-success">Admin updated successfully!</div>';
+    }
+
+    if (empty($message)) {
+        $existingCheck = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
+        $existingCheck->execute([$email, $id]);
+        if ($existingCheck->rowCount() > 0) {
+            $message = '<div class="alert alert-danger">Another admin already uses this email!</div>';
+        } else {
+            if ($password) {
+                $stmt = $pdo->prepare("UPDATE users SET full_name=?, email=?, role=?, status=?, password=? WHERE id=?");
+                $stmt->execute([$name, $email, $role, $status, $password, $id]);
+            } else {
+                $stmt = $pdo->prepare("UPDATE users SET full_name=?, email=?, role=?, status=? WHERE id=?");
+                $stmt->execute([$name, $email, $role, $status, $id]);
+            }
+            $message = '<div class="alert alert-success">Admin updated successfully!</div>';
+        }
     }
 }
 
 // Delete Admin
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
     $id = (int)$_GET['delete'];
-    $pdo->prepare("DELETE FROM users WHERE id = ?")->execute([$id]);
-    $message = '<div class="alert alert-danger">Admin deleted successfully!</div>';
+    if ($id === $_SESSION['user_id']) {
+        $message = '<div class="alert alert-danger">You cannot delete yourself!</div>';
+    } else {
+        $pdo->prepare("DELETE FROM users WHERE id = ?")->execute([$id]);
+        $message = '<div class="alert alert-danger">Admin deleted successfully!</div>';
+    }
 }
 
 // Search and filter functionality
@@ -153,7 +167,11 @@ include 'partials/sidebar.php';
                                 <td><span class="badge bg-<?= $admin['status'] === 'active' ? 'success' : 'secondary' ?>"><?= ucfirst($admin['status']) ?></span></td>
                                 <td>
                                     <button class="btn btn-sm btn-outline-primary" onclick='editAdmin(<?= json_encode($admin) ?>)'><i class="fas fa-edit"></i></button>
-                                    <a href="?delete=<?= $admin['id'] ?>" onclick="return confirm('Delete this admin?')" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
+                                    <?php if ($admin['id'] !== $_SESSION['user_id']): // Prevent self-deletion ?>
+                                        <a href="?delete=<?= $admin['id'] ?>" onclick="return confirm('Delete this admin?')" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
+                                    <?php else: ?>
+                                        <button class="btn btn-sm btn-outline-danger" disabled><i class="fas fa-trash"></i></button>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

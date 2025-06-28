@@ -89,7 +89,76 @@
             left: 0;
         }
 
-        /* Add more common styles here */
+        /* Footer */
+        .footer {
+            background: var(--primary-color);
+            color: white;
+            padding: 3rem 0 1rem;
+        }
+
+        .footer h5 {
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+        }
+
+        .footer a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: var(--secondary-color);
+        }
+
+        .social-icons a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: var(--secondary-color);
+            color: var(--primary-color);
+            text-align: center;
+            line-height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            color:#fff;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(251, 191, 36, 0.3);
+        }
+        @media (max-width: 992px) {
+            .filter-buttons {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                justify-content: center !important;
+                gap: 0.5rem !important;
+            }
+            .filter-btn{
+                font-size: 10px;
+            }
+
+            .watch-btn{
+                width: 100% !important;
+            }
+
+            .page-header h1 {
+                font-size: 1.8rem !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 2.5rem !important;
+        }
+
+        @media (max-width: 575.98px) {
+            .page-header h1 {
+                font-size: 1.5rem !important;
+            }
+        }
     </style>
 </head>
 <body>

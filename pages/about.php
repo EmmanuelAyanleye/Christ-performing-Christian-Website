@@ -32,70 +32,93 @@ include '../includes/header.php';
             font-family: 'Playfair Display', serif;
         }
 
-        /* Navigation Styles */
-        .navbar {
-            background: rgba(255, 255, 255, 0.95) !important;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
+.hero,
+.page-header {
+    min-height: 70vh;
+    max-height: 80vh;
+    width: 100vw;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    position: relative;
+    padding-top: 70px; 
+    padding-left: 0;
+    padding-right: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
 
-        .navbar-brand {
-            font-weight: 700;
-            color: var(--primary-color) !important;
-            font-size: 1.5rem;
-        }
+.hero .container,
+.page-header .container {
+    width: 100%;
+    max-width: 1200px;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin: 0 auto;
+}
 
-        .nav-link {
-            font-weight: 500;
-            color: var(--text-dark) !important;
-            transition: color 0.3s ease;
-            position: relative;
-        }
+.hero-content,
+.page-header > .container > div {
+    width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
 
-        .nav-link:hover {
-            color: var(--primary-color) !important;
-        }
+.hero h1,
+.page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    line-height: 1.2;
+}
 
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 50%;
-            background-color: var(--secondary-color);
-            transition: all 0.3s ease;
-        }
+.hero p,
+.page-header p {
+    font-size: 1.15rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.92;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
 
-        .nav-link:hover::after {
-            width: 100%;
-            left: 0;
-        }
+@media (max-width: 991.98px) {
+    .hero,
+    .page-header {
+        min-height: 40vh;
+        padding-top: 70px;
+    }
+    .hero h1,
+    .page-header h1 {
+        font-size: 2rem;
+    }
+    .hero p,
+    .page-header p {
+        font-size: 1rem;
+    }
+}
 
-        /* Page Header */
-        .page-header {
-            height: 60vh;
-            background: linear-gradient(rgba(30, 58, 138, 0.8), rgba(30, 58, 138, 0.8)),
-                        url('<?php echo BASE_URL; ?>/images/about.jpeg') center/cover;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: white;
-        }
-
-        .page-header h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .page-header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
+@media (max-width: 575.98px) {
+    .hero,
+    .page-header {
+        min-height: 50vh;
+        padding-top: 55px;
+    }
+    .hero h1,
+    .page-header h1 {
+        font-size: 1.2rem;
+    }
+    .hero p,
+    .page-header p {
+        font-size: 0.95rem;
+    }
+}
 
         /* Section Styles */
         .section-padding {
@@ -136,6 +159,51 @@ include '../includes/header.php';
             transform: translateY(-5px);
         }
 
+        /* Prevent horizontal overflow */
+        html, body {
+            overflow-x: hidden;
+            width: 100vw;
+        }
+
+        /* Make all images responsive */
+        img, .img-fluid {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Container and row fixes */
+        
+
+        /* Container and row fixes */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-left: 15px;
+            padding-right: 15px;
+            box-sizing: border-box;
+        }
+        .row {
+            margin-left: -15px;
+            margin-right: -15px;
+            flex-wrap: wrap;
+        }
+
+        /* Remove negative margins on small screens */
+        @media (max-width: 575.98px) {
+            .row {
+                margin-left: 0;
+                margin-right: 0;
+            }
+        }
+
+        /* Responsive section padding */
+        .section-padding {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
         .info-card i {
             font-size: 3rem;
             color: var(--secondary-color);
@@ -146,8 +214,8 @@ include '../includes/header.php';
             color: var(--primary-color);
             margin-bottom: 1rem;
         }
-
-        /* Leadership Cards */
+        /* Further adjustments for mobile */
+        @media (max-width: 768px){
         .leader-card {
             background: white;
             border-radius: 15px;
@@ -164,6 +232,7 @@ include '../includes/header.php';
             width: 100%;
             height: 250px;
             object-fit: cover;
+            border-radius: 0;
         }
 
         .leader-card-body {
@@ -210,16 +279,52 @@ include '../includes/header.php';
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(251, 191, 36, 0.3);
         }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 992px) {
+            .section-padding {
+                padding: 40px 0;
+            }
+            .leader-card img {
+                height: 180px;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .section-padding {
+                padding: 25px 0;
+            }
+            .leader-card img {
+                height: 140px;
+            }
+            .info-card {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .row {
+                margin-left: 0;
+                margin-right: 0;
+            }
+            .leader-card img {
+                height: 100px;
+            }
+            .info-card {
+                padding: 0.7rem;
+            }
+        }
     </style>
 
 <!-- Page Header -->
-<section class="page-header">
-    <div class="container">
-        <div data-aos="fade-up">
-            <h1 class="font-display">About Christ performing Christian Centre</h1>
-            <p>Building Faith, Strengthening Community, Serving with Love</p>
-        </div>
+ <section class="page-header" style="background: linear-gradient(rgba(30, 58, 138, 0.8), rgba(30, 58, 138, 0.8)),
+                        url('<?php echo BASE_URL; ?>/images/about.jpeg') center/cover;">
+  <div class="container">
+    <div>
+      <h1>About us</h1>
+      <p>Building Faith, Strengthening Community, Serving with Love</p>
     </div>
+  </div>
 </section>
 
 <!-- Our Story Section -->
@@ -270,46 +375,7 @@ include '../includes/header.php';
 </section>
 
 <!-- Leadership Team -->
-<section class="section-padding">
-    <div class="container">
-        <div class="section-title" data-aos="fade-up">
-            <h2 class="font-display">Our Leadership Team</h2>
-            <p>Meet the dedicated leaders who shepherd our church family with love and wisdom</p>
-        </div>
-        <div class="row">
-            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
-                <div class="leader-card">
-                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=300&fit=crop" alt="Pastor David Adebayo">
-                    <div class="leader-card-body">
-                        <h5>Pastor David Adebayo</h5>
-                        <p class="text-primary">Senior Pastor</p>
-                        <p>Pastor David has been leading Christ performing Christian Centre for over 15 years with wisdom, compassion, and a heart for God's people.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
-                <div class="leader-card">
-                    <img src="https://images.unsplash.com/photo-1494790108755-2616b612b77c?w=400&h=300&fit=crop" alt="Pastor Grace Okafor">
-                    <div class="leader-card-body">
-                        <h5>Pastor Grace Okafor</h5>
-                        <p class="text-primary">Associate Pastor</p>
-                        <p>Pastor Grace oversees our women's ministry and community outreach programs, bringing hope to countless lives.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
-                <div class="leader-card">
-                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop" alt="Elder Samuel Johnson">
-                    <div class="leader-card-body">
-                        <h5>Elder Samuel Johnson</h5>
-                        <p class="text-primary">Youth Pastor</p>
-                        <p>Elder Samuel leads our vibrant youth ministry, mentoring the next generation of Christian leaders.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+
 
 <!-- Contact & Service Info -->
 <section class="section-padding bg-primary text-white">

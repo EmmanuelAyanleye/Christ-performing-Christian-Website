@@ -2,6 +2,8 @@
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/partials/session_auth.php';
 
+require_super_admin();
+
 $pageTitle = "Manage Events";
 $message = '';
 

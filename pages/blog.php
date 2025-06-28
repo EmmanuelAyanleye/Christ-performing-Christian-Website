@@ -131,66 +131,93 @@ include '../includes/header.php';
             font-family: 'Playfair Display', serif;
         }
 
-        /* Navigation Styles */
-        .navbar {
-            background: rgba(255, 255, 255, 0.95) !important;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
+.hero,
+.page-header {
+    min-height: 70vh;
+    max-height: 80vh;
+    width: 100vw;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    position: relative;
+    padding-top: 70px; 
+    padding-left: 0;
+    padding-right: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
 
-        .navbar-brand {
-            font-weight: 700;
-            color: var(--primary-color) !important;
-            font-size: 1.5rem;
-        }
+.hero .container,
+.page-header .container {
+    width: 100%;
+    max-width: 1200px;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin: 0 auto;
+}
 
-        .nav-link {
-            font-weight: 500;
-            color: var(--text-dark) !important;
-            transition: color 0.3s ease;
-            position: relative;
-        }
+.hero-content,
+.page-header > .container > div {
+    width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
 
-        .nav-link:hover {
-            color: var(--primary-color) !important;
-        }
+.hero h1,
+.page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    line-height: 1.2;
+}
 
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 50%;
-            background-color: var(--secondary-color);
-            transition: all 0.3s ease;
-        }
+.hero p,
+.page-header p {
+    font-size: 1.15rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.92;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
 
-        .nav-link:hover::after {
-            width: 100%;
-            left: 0;
-        }
+@media (max-width: 991.98px) {
+    .hero,
+    .page-header {
+        min-height: 40vh;
+        padding-top: 70px;
+    }
+    .hero h1,
+    .page-header h1 {
+        font-size: 2rem;
+    }
+    .hero p,
+    .page-header p {
+        font-size: 1rem;
+    }
+}
 
-        /* Page Header */
-        .page-header {
-            height: 70vh;
-            background: linear-gradient(rgba(30, 58, 138, 0.8), rgba(30, 58, 138, 0.8)),
-                        url('<?php echo BASE_URL; ?>/images/blog.jpg') center/cover;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: white;
-        }
-
-        .page-header h1 {
-            margin-top: 76px;
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
+@media (max-width: 575.98px) {
+    .hero,
+    .page-header {
+        min-height: 50vh;
+        padding-top: 55px;
+    }
+    .hero h1,
+    .page-header h1 {
+        font-size: 1.2rem;
+    }
+    .hero p,
+    .page-header p {
+        font-size: 0.95rem;
+    }
+}
 
         /* Search Bar */
         .search-section {
@@ -235,10 +262,12 @@ include '../includes/header.php';
         }
 
         .blog-card img {
-            width: 250px;
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
             height: 200px;
             object-fit: cover;
-            transition: transform 0.3s ease;
+            border-radius: 0;
         }
 
         .blog-card:hover img {
@@ -300,7 +329,8 @@ include '../includes/header.php';
         }
 
         @media (max-width: 768px) {
-            .blog-card {
+            /* Stack image and text vertically on smaller screens */
+            .blog-card, .recent-post {
                 flex-direction: column;
                 height: auto;
             }
@@ -309,6 +339,23 @@ include '../includes/header.php';
                 width: 100%;
                 height: 150px;
             }
+
+            .recent-post img{
+                width: 100%;
+                height: 150px;
+
+            }
+            .recent-post {
+                flex-direction: column; /* Stack image and text in recent posts */
+                align-items: center;
+                text-align: center;
+            }
+            .recent-post img { margin-bottom: 0.5rem; }
+            .page-header h1 {font-size: 2.5rem;} /* Further reduce header size on mobile */
+        }
+        
+        @media (max-width: 576px) { /* Adjust for very small screens */
+            .page-header h1 {font-size: 2.5rem;}
         }
 
         /* Sidebar Styles */
@@ -449,16 +496,120 @@ include '../includes/header.php';
             background: var(--primary-color);
             border-color: var(--primary-color);
         }
+
+        /* Prevent horizontal overflow */
+        html, body {
+            overflow-x: hidden;
+            width: 100vw;
+        }
+
+        /* Make all images responsive */
+        img, .img-fluid {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Container and row fixes */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-left: 15px;
+            padding-right: 15px;
+            box-sizing: border-box;
+        }
+        .row {
+            margin-left: -15px;
+            margin-right: -15px;
+            flex-wrap: wrap;
+        }
+
+        /* Remove negative margins on small screens */
+        @media (max-width: 575.98px) {
+            .row {
+                margin-left: 0;
+                margin-right: 0;
+            }
+        }
+
+        /* Responsive section padding */
+        .section-padding {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        /* Blog card image fix */
+        .blog-card img {
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 0;
+        }
+
+        /* Responsive adjustments for blog cards and sidebar */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                position: static;
+                top: auto;
+                margin-top: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .section-padding {
+                padding: 20px 0;
+            }
+            .blog-card,
+            .recent-post {
+                flex-direction: column !important;
+                height: auto !important;
+            }
+            .blog-card img,
+            .recent-post img {
+                width: 100% !important;
+                height: 150px !important;
+            }
+            .blog-card-body {
+                padding: 1rem !important;
+            }
+            .sidebar-widget {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .row {
+                margin-left: 0;
+                margin-right: 0;
+            }
+            .blog-card img,
+            .recent-post img {
+                height: 120px !important;
+            }
+            .blog-card-body {
+                padding: 0.7rem !important;
+            }
+            .sidebar-widget {
+                padding: 0.7rem;
+            }
+            .page-header h1 {
+                font-size: 1.5rem !important;
+            }
+        }
     </style>
 
 <!-- Page Header -->
-<section class="page-header">
-    <div class="container">
-        <div data-aos="fade-up">
-            <h1 class="font-display">Our Blog</h1>
-            <p>Insights, devotions, and updates from our church community</p>
-        </div>
+ <section class="page-header" style="background: linear-gradient(rgba(30, 58, 138, 0.8), rgba(30, 58, 138, 0.8)),
+                        url('<?php echo BASE_URL; ?>/images/blog.jpg') center/cover;">
+  <div class="container">
+    <div>
+      <h1>Our Blog</h1>
+      <p>Insights, devotions, and updates from our church community</p>
     </div>
+  </div>
 </section>
 
 <section class="section-padding">

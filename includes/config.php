@@ -37,10 +37,10 @@ try {
 
 // Email (SMTP) settings for PHPMailer
 define('SMTP_HOST', 'smtp.gmail.com');
-define('SMTP_USER', 'youremail@gmail.com');
-define('SMTP_PASS', '**** **** ****'); // IMPORTANT: Use a Google App Password here, not your regular password!
+define('SMTP_USER', 'eaim269@gmail.com');
+define('SMTP_PASS', 'hwaw wjqn bqji kthh'); // IMPORTANT: Use a Google App Password here, not your regular password!
 define('SMTP_PORT', 587); // Use 587 for TLS or 465 for SSL
-define('SMTP_FROM_EMAIL', 'youremail@gmail.com');
+define('SMTP_FROM_EMAIL', 'eaim269@gmail.com');
 define('SMTP_FROM_NAME', 'Christ performing Christian Centre');
 
 // Include utility functions

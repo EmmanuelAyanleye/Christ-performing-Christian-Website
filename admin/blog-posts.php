@@ -1,15 +1,8 @@
 <?php
 require_once '../includes/config.php';
 require_once '../includes/functions.php';
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Authentication check
-if (!isset($_SESSION['admin_logged_in'])) {
-    header('Location: login.php');
-    exit();
-}
+require_once __DIR__ . '/partials/session_auth.php';
+// This page is accessible by all admin roles, so no further checks are needed.
 
 $message = '';
 
@@ -27,7 +20,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_post'])) {
     $category = sanitize_input($_POST['category']);
     $excerpt = sanitize_input($_POST['excerpt']);
     $content = $_POST['content'];
-    $tags = sanitize_input($_POST['tags']);
+    $raw_tags = sanitize_input($_POST['tags']);
+    // Normalize tags: split by comma, trim each, then join with comma
+    $normalized_tags_array = array_map('trim', explode(',', $raw_tags));
+    $tags = implode(',', array_filter($normalized_tags_array)); // Remove empty tags if any
     $status = sanitize_input($_POST['status']);
     $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title)));
     $author_id = $_SESSION['user_id'];
@@ -211,7 +207,8 @@ include __DIR__ . '/partials/sidebar.php';
                                     <td><?php echo date('M j, Y', strtotime($post['created_at'])); ?></td>
                                     <td><?php echo (int)$post['view_count']; ?></td>
                                     <td>
-                                        <button class="btn btn-sm btn-primary" onclick='editPost(<?php echo json_encode($post); ?>)'>
+                                        <button class="btn btn-sm btn-primary edit-btn"
+                                                data-post='<?php echo htmlspecialchars(json_encode($post), ENT_QUOTES, 'UTF-8'); ?>'>
                                             <i class="fas fa-edit"></i>
                                         </button>
                                         <form method="POST" style="display:inline-block;" onsubmit="return confirm('Delete this post?');">
@@ -303,6 +300,42 @@ include __DIR__ . '/partials/sidebar.php';
     </div>
 </div>
 
+
+
+
+<?php include __DIR__ . '/partials/footer.php'; ?>
+
+<script>
+document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const post = JSON.parse(btn.getAttribute('data-post'));
+        const modal = new bootstrap.Modal(document.getElementById('addPostModal'));
+
+        document.getElementById('addPostModalLabel').innerText = 'Edit Blog Post';
+        document.querySelector('[name="post_id"]').value = post.id;
+        document.querySelector('[name="title"]').value = post.title;
+        document.querySelector('[name="category"]').value = post.category;
+        document.querySelector('[name="excerpt"]').value = post.excerpt;
+        document.querySelector('[name="status"]').value = post.status;
+        document.querySelector('[name="tags"]').value = post.tags;
+
+        // Decode content safely into the textarea
+        const contentArea = document.querySelector('[name="content"]');
+        contentArea.value = decodeHTMLEntities(post.content);
+
+        modal.show();
+    });
+});
+
+// Helper to decode HTML entities
+function decodeHTMLEntities(str) {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = str;
+    return textarea.value;
+}
+</script>
+
+
 <script>
 function editPost(post) {
     const modal = new bootstrap.Modal(document.getElementById('addPostModal'));
@@ -312,12 +345,20 @@ function editPost(post) {
     document.querySelector('[name="title"]').value = post.title;
     document.querySelector('[name="category"]').value = post.category;
     document.querySelector('[name="excerpt"]').value = post.excerpt;
-    document.querySelector('[name="content"]').value = post.content;
     document.querySelector('[name="status"]').value = post.status;
     document.querySelector('[name="tags"]').value = post.tags;
 
+    // Properly decode HTML content
+    const contentArea = document.querySelector('[name="content"]');
+    contentArea.value = decodeHTMLEntities(post.content); // safer way
+
     modal.show();
 }
-</script>
 
-<?php include __DIR__ . '/partials/footer.php'; ?>
+// Helper function to decode HTML entities
+function decodeHTMLEntities(str) {
+    const txt = document.createElement("textarea");
+    txt.innerHTML = str;
+    return txt.value;
+}
+</script>

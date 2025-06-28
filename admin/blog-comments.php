@@ -7,6 +7,8 @@ use PHPMailer\PHPMailer\Exception;
 
 require_once __DIR__ . '/partials/session_auth.php';
 
+// This page is accessible by all admin roles.
+
 $pageTitle = "Manage Blog Comments";
 $current_page = 'blog-comments'; // For sidebar highlighting
 $message_feedback = '';
@@ -248,7 +250,7 @@ include __DIR__ . '/partials/header.php';
                                     </td>
                                     <td><?php echo htmlspecialchars($comment['email']); ?></td>
                                     <td><a href="<?php echo BASE_URL; ?>/pages/blog-article.php?slug=<?php echo htmlspecialchars($comment['post_slug']); ?>" target="_blank"><?php echo htmlspecialchars($comment['post_title']); ?></a></td>
-                                    <td><div class="comment-content-truncate" title="<?php echo htmlspecialchars($comment['content']); ?>"><?php echo htmlspecialchars($comment['content']); ?></div></td>
+                                    <td><div class="comment-content-truncate" title="<?php echo html_entity_decode($comment['content']); ?>"><?php echo html_entity_decode($comment['content']); ?></div></td>
                                     <td>
                                         <span class="badge bg-<?php
                                             if ($comment['status'] === 'approved') echo 'success';

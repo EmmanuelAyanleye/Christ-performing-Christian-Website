@@ -53,54 +53,25 @@ include '../includes/header.php';
             color: var(--text-dark);
         }
 
+        
+
         .font-display {
             font-family: 'Playfair Display', serif;
         }
-
-        /* Navigation Styles */
-        .navbar {
-            background: rgba(255, 255, 255, 0.95) !important;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .navbar-brand {
-            font-weight: 700;
-            color: var(--primary-color) !important;
-            font-size: 1.5rem;
-        }
-
-        .nav-link {
-            font-weight: 500;
-            color: var(--text-dark) !important;
-            transition: color 0.3s ease;
-            position: relative;
-        }
-
-        .nav-link:hover {
-            color: var(--primary-color) !important;
-        }
-
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -5px;
-            left: 50%;
-            background-color: var(--secondary-color);
-            transition: all 0.3s ease;
-        }
-
-        .nav-link:hover::after {
+        /* Container and row fixes */
+        .container {
             width: 100%;
-            left: 0;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-left: 15px;
+            padding-right: 15px;
+            box-sizing: border-box;
         }
 
         /* Video Section */
         .video-section {
-            padding: 100px 0 60px;
+            margin-top: 50px;
+            padding: 60px 0 30px;
             background: var(--bg-light);
         }
 
@@ -110,9 +81,10 @@ include '../includes/header.php';
             height: 0;
             padding-bottom: 56.25%;
             background: #000;
-            border-radius: 15px;
+            border-radius: 10px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+            margin-bottom: 1.5rem;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
         .video-container iframe {
@@ -123,27 +95,29 @@ include '../includes/header.php';
             height: 100%;
         }
 
+        /* Sermon Info */
         .sermon-info {
             background: white;
-            padding: 2rem;
-            border-radius: 15px;
+            padding: 1.2rem;
+            margin-top: 1.2rem;
+            border-radius: 10px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            margin-top: 2rem;
         }
 
         .sermon-meta {
             display: flex;
             align-items: center;
-            gap: 2rem;
+            gap: 1rem;
             margin-bottom: 1.5rem;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             color: var(--text-light);
+            flex-wrap: wrap;
         }
 
         .sermon-actions {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.5rem;
             margin: 1.5rem 0;
             flex-wrap: wrap;
         }
@@ -152,13 +126,14 @@ include '../includes/header.php';
             background: none;
             border: 2px solid var(--text-light);
             color: var(--text-light);
-            padding: 8px 16px;
-            border-radius: 25px;
+            padding: 7px 14px;
+            border-radius: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            font-size: 1rem;
         }
 
         .action-btn:hover {
@@ -180,29 +155,31 @@ include '../includes/header.php';
 
         /* Description */
         .sermon-description {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            margin: 2rem 0;
+            font-size: 1rem;
+            margin: 1.2rem 0;
+        }
+        .sermon-description ul {
+            padding-left: 1.2rem;
         }
 
         /* Comment Section */
         .comment-section {
             background: white;
-            padding: 2rem;
-            border-radius: 15px;
+            padding: 1.2rem;
+            margin-top: 1.2rem;
+            border-radius: 10px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            margin-top: 2rem;
         }
 
         .comment-form {
             background: var(--bg-light);
-            padding: 1.5rem;
-            border-radius: 10px;
+            padding: 1rem;
+            border-radius: 8px;
             margin-bottom: 2rem;
         }
 
         .comment {
-            padding: 1.5rem 0;
+            padding: 1rem 0;
             border-bottom: 1px solid #e5e7eb;
         }
 
@@ -244,11 +221,12 @@ include '../includes/header.php';
         .recommended-sermon {
             display: flex;
             background: white;
-            border-radius: 10px;
+            border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
+            flex-direction: row;
         }
 
         .recommended-sermon:hover {
@@ -256,13 +234,14 @@ include '../includes/header.php';
         }
 
         .recommended-sermon img {
-            width: 150px;
-            height: 100px;
+            width: 120px;
+            height: 80px;
             object-fit: cover;
+            border-radius: 8px 0 0 8px;
         }
 
         .recommended-sermon-content {
-            padding: 1rem;
+            padding: 0.7rem;
             flex: 1;
         }
 
@@ -280,7 +259,7 @@ include '../includes/header.php';
         .footer {
             background: var(--primary-color);
             color: white;
-            padding: 3rem 0 1rem;
+            padding: 2rem 0 1rem;
         }
 
         .footer h5 {
@@ -323,7 +302,51 @@ include '../includes/header.php';
             
             .recommended-sermon img {
                 width: 100%;
-                height: 150px;
+                height: 120px;
+                border-radius: 8px 8px 0 0;
+            }
+            .recommended-sermon-content {
+                padding: 0.5rem 0.7rem;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .video-section {
+                padding: 30px 0 10px;
+            }
+            .video-container {
+                border-radius: 8px;
+            }
+            .sermon-info {
+                padding: 0.7rem;
+                margin-top: 0.7rem;
+            }
+            .sermon-meta {
+                font-size: 0.85rem;
+                gap: 0.7rem;
+            }
+            .action-btn {
+                font-size: 0.5rem;
+                padding: 6px 10px;
+                margin-bottom: 5px;
+            }
+            .sermon-description {
+                font-size: 0.97rem;
+                margin: 0.8rem 0;
+            }
+            .comment-section {
+                padding: 0.7rem;
+                margin-top: 0.7rem;
+            }
+            .comment-form {
+                padding: 0.7rem;
+            }
+            .comment {
+                padding: 0.7rem 0;
+            }
+            .recommended-sermon {
+                flex-direction: column;
+                align-items: stretch;
             }
         }
     </style>
@@ -333,7 +356,7 @@ include '../includes/header.php';
         <div class="row">
             <div class="col-lg-8">
                 <!-- Video Player -->
-                <div class="video-container" data-aos="fade-up">
+                <div class="video-container" data-aos="">
                     <?php if (!empty($sermon['youtube_url'])): ?>
                         <iframe src="<?php echo embedYouTubeUrl($sermon['youtube_url']); ?>" title="<?php echo htmlspecialchars($sermon['title']); ?>" allowfullscreen></iframe>
                     <?php elseif (!empty($sermon['video_url'])): ?>
@@ -406,7 +429,7 @@ include '../includes/header.php';
             </div>
 
             <!-- Sidebar -->
-            <div class="col-lg-4">
+            <div class="col-lg-4 mt-4">
                 <div class="sticky-top" style="top: 100px;">
                     <!-- Recommended Sermons -->
                     <div data-aos="fade-left">

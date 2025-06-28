@@ -7,6 +7,9 @@ use PHPMailer\PHPMailer\Exception;
 
 require_once __DIR__ . '/partials/session_auth.php';
 
+// This page is for super admins only
+require_super_admin();
+
 $pageTitle = "Contact Messages";
 $message_feedback = '';
 

@@ -88,47 +88,6 @@ include '../includes/header.php';
         font-family: 'Playfair Display', serif;
     }
 
-    /* Navigation Styles */
-    .navbar {
-        background: rgba(255, 255, 255, 0.95) !important;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-    }
-
-    .navbar-brand {
-        font-weight: 700;
-        color: var(--primary-color) !important;
-        font-size: 1.5rem;
-    }
-
-    .nav-link {
-        font-weight: 500;
-        color: var(--text-dark) !important;
-        transition: color 0.3s ease;
-        position: relative;
-    }
-
-    .nav-link:hover {
-        color: var(--primary-color) !important;
-    }
-
-    .nav-link::after {
-        content: '';
-        position: absolute;
-        width: 0;
-        height: 2px;
-        bottom: -5px;
-        left: 50%;
-        background-color: var(--secondary-color);
-        transition: all 0.3s ease;
-    }
-
-    .nav-link:hover::after {
-        width: 100%;
-        left: 0;
-    }
-
     /* Article Styles */
     .article-header {
         padding: 120px 0 60px;
@@ -149,31 +108,113 @@ include '../includes/header.php';
             flex-wrap: wrap;
             gap: 1rem;
         }
+
+        .article-header {
+            padding: 90px 0px 0px 0px;
+            background: var(--bg-light);
+        }
     }
 
+    /* Container and row fixes */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-left: 15px;
+            padding-right: 15px;
+            box-sizing: border-box;
+        }
+
     .article-content {
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         line-height: 1.8;
+        color: #333;
     }
 
     .article-content h2 {
         color: var(--primary-color);
         margin: 2rem 0 1rem;
+        font-family: 'Playfair Display', serif;
+        font-weight: 600;
     }
 
     .article-content h3 {
         color: var(--text-dark);
+        margin: 1.8rem 0 1rem;
+        font-family: 'Playfair Display', serif;
+        font-weight: 500;
+    }
+
+    .article-content h4, .article-content h5, .article-content h6 {
+        color: var(--text-dark);
         margin: 1.5rem 0 1rem;
+        font-weight: 600;
     }
 
     .article-content p {
         margin-bottom: 1.5rem;
     }
 
+    .article-content a {
+        color: var(--primary-color);
+        text-decoration: underline;
+    }
+
+    .article-content ul, .article-content ol {
+        padding-left: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .article-content blockquote {
+        border-left: 4px solid var(--secondary-color);
+        padding-left: 1.5rem;
+        margin: 2rem 0;
+        font-style: italic;
+        color: var(--text-dark);
+    }
+
+    .article-content strong {
+        font-weight: 600;
+    }
+    .article-content em {
+        font-style: italic;
+    }
+    .article-content code {
+        background-color: #f1f1f1;
+        padding: .2em .4em;
+        margin: 0;
+        font-size: 85%;
+        border-radius: 3px;
+        font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+    }
+    .article-content pre {
+        background: #f1f1f1;
+        padding: 1rem;
+        border-radius: 5px;
+        overflow-x: auto;
+    }
+    .article-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 2rem 0;
+    }
+    .article-content th, .article-content td {
+        border: 1px solid #ddd;
+        padding: 0.8rem;
+        text-align: left;
+    }
+    .article-content th {
+        background-color: #f2f2f2;
+    }
+
     .share-buttons {
         padding: 2rem 0;
         border-top: 1px solid #e5e7eb;
         border-bottom: 1px solid #e5e7eb;
+        text-align: center;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     .share-btn {
@@ -184,6 +225,9 @@ include '../includes/header.php';
         margin-right: 10px;
         color: var(--text-dark);
         transition: all 0.3s ease;
+        margin-bottom: 0.5rem;
+        font-size: 1rem !important;
+        cursor: pointer;
     }
 
     .share-btn:hover {
@@ -325,29 +369,31 @@ include '../includes/header.php';
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <?php if ($post): ?>
-                    <div class="article-content" data-aos="fade-up">
+                    <div class="article-content mb-4" data-aos="fade-up">
                         <?php if (!empty($post['featured_image'])): ?>
                             <img src="<?php echo BASE_URL . '/' . htmlspecialchars($post['featured_image']); ?>" alt="<?php echo htmlspecialchars($post['title']); ?>" class="img-fluid rounded mb-4">
                         <?php endif; ?>
                         
-                        <?php echo $post['content']; // Assuming content is trusted HTML from a WYSIWYG editor ?>
+                        <?php echo $post['content']; ?>
                     </div>
 
                     <!-- Share Buttons -->
                     <div class="share-buttons" data-aos="fade-up">
-                        <h5 class="mb-3">Share this article:</h5>
-                        <button class="share-btn" onclick="shareArticle('facebook')">
+                        <h5 class="mb-3">Share this article: </h5>
+                        <div>
+                            <button class="share-btn" onclick="shareArticle('facebook')">
                             <i class="fab fa-facebook-f me-2"></i>Facebook
-                        </button>
-                        <button class="share-btn" onclick="shareArticle('twitter')">
-                            <i class="fab fa-twitter me-2"></i>Twitter
-                        </button>
-                        <button class="share-btn" onclick="shareArticle('whatsapp')">
-                            <i class="fab fa-whatsapp me-2"></i>WhatsApp
-                        </button>
-                        <button class="share-btn" onclick="shareArticle('copy')">
-                            <i class="fas fa-link me-2"></i>Copy Link
-                        </button>
+                            </button>
+                            <button class="share-btn" onclick="shareArticle('twitter')">
+                                <i class="fab fa-twitter me-2"></i>Twitter
+                            </button>
+                            <button class="share-btn" onclick="shareArticle('whatsapp')">
+                                <i class="fab fa-whatsapp me-2"></i>WhatsApp
+                            </button>
+                            <button class="share-btn" onclick="shareArticle('copy')">
+                                <i class="fas fa-link me-2"></i>Copy Link
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Comment Section -->
@@ -388,7 +434,7 @@ include '../includes/header.php';
                                         <?php endif; ?>
                                     </div>
                                     <div class="comment-date"><?php echo date('F j, Y \a\t g:i a', strtotime($comment['created_at'])); ?></div>
-                                    <p><?php echo htmlspecialchars($comment['content']); ?></p>
+                                    <p><?php echo html_entity_decode($comment['content']); ?></p>
                                     <div class="comment-actions">
                                         <button class="comment-btn like-comment" data-comment-id="<?php echo $comment['id']; ?>">
                                             <i class="fas fa-thumbs-up me-1"></i>Like (<span class="like-count"><?php echo htmlspecialchars($comment['likes']); ?></span>)
