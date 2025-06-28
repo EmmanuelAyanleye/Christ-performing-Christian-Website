@@ -22,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_event'])) {
     $description = sanitize_input($_POST['description']);
     $location = sanitize_input($_POST['location']);
     $start_date = sanitize_input($_POST['start_date']);
+    $recurrence = sanitize_input($_POST['recurrence'] ?? 'none');
 
     $featured_image = $_POST['existing_image'];
     if (isset($_FILES['featured_image']) && $_FILES['featured_image']['error'] == 0) {
@@ -37,12 +38,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_event'])) {
     }
 
     if ($id > 0) {
-        $stmt = $pdo->prepare("UPDATE events SET title = ?, description = ?, start_date = ?, location = ?, featured_image = ? WHERE id = ?");
-        $stmt->execute([$title, $description, $start_date, $location, $featured_image, $id]);
+        $stmt = $pdo->prepare("UPDATE events SET title = ?, description = ?, start_date = ?, location = ?, featured_image = ?, recurrence = ? WHERE id = ?");
+        $stmt->execute([$title, $description, $start_date, $location, $featured_image, $recurrence, $id]);
         $message = '<div class="alert alert-success">Event updated successfully.</div>';
     } else {
-        $stmt = $pdo->prepare("INSERT INTO events (title, description, start_date, location, featured_image) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$title, $description, $start_date, $location, $featured_image]);
+        $stmt = $pdo->prepare("INSERT INTO events (title, description, start_date, location, featured_image, recurrence) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$title, $description, $start_date, $location, $featured_image, $recurrence]);
         $message = '<div class="alert alert-success">Event added successfully.</div>';
     }
 }
@@ -139,6 +140,7 @@ include __DIR__ . '/partials/sidebar.php';
                             <th>Date & Time</th>
                             <th>Location</th>
                             <th>Status</th>
+                            <th>Recurrence</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -168,6 +170,9 @@ include __DIR__ . '/partials/sidebar.php';
                                     $start = new DateTime($event['start_date']);
                                     echo $now > $start ? '<span class="badge bg-secondary">Completed</span>' : '<span class="badge bg-primary">Upcoming</span>';
                                     ?>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info"><?php echo ucfirst(htmlspecialchars($event['recurrence'] ?: 'none')); ?></span>
                                 </td>
                                 <td>
                                     <button class="btn btn-sm btn-outline-primary btn-action" title="Edit" onclick='prepareEditModal(<?php echo json_encode($event); ?>)'>
@@ -218,9 +223,18 @@ include __DIR__ . '/partials/sidebar.php';
                         </div>
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label">Recurrence</label>
+                        <select class="form-select" name="recurrence" id="recurrence">
+                            <option value="none" selected>One-time Event</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+
                     <div class="mb-3 mt-3">
                         <label class="form-label">Description *</label>
-                        <textarea class="form-control" name="description" id="description" rows="4" required></textarea>
+                        <textarea class="form-control" name="description" id="description" rows="4"></textarea>
                     </div>
 
                     <div class="mb-3">
@@ -250,6 +264,7 @@ function prepareAddModal() {
     form.reset();
     document.getElementById('event_id').value = '0';
     document.getElementById('modalTitle').textContent = 'Add New Event';
+    document.getElementById('recurrence').value = 'none';
     document.getElementById('current_image_preview').style.display = 'none';
     eventModal.show();
 }
@@ -262,6 +277,7 @@ function prepareEditModal(event) {
     document.getElementById('description').value = event.description;
     document.getElementById('location').value = event.location;
     document.getElementById('start_date').value = event.start_date.replace(' ', 'T');
+    document.getElementById('recurrence').value = event.recurrence || 'none';
     document.getElementById('existing_image').value = event.featured_image;
 
     const preview = document.getElementById('current_image_preview');

@@ -48,4 +48,34 @@ function get_excerpt($text, $length = 100) {
     return $text;
 }
 
+/**
+ * Calculates the next occurrence of a recurring event.
+ * If the event's start date is in the future, it returns that date.
+ * If it's in the past, it calculates the next future occurrence based on the rule.
+ *
+ * @param string $start_date_str The initial start date of the event.
+ * @param string $recurrence The recurrence rule ('none', 'weekly', 'monthly').
+ * @return string The next upcoming date in 'Y-m-d H:i:s' format.
+ */
+function calculate_next_occurrence($start_date_str, $recurrence) {
+    if ($recurrence === 'none' || $recurrence === null || empty($recurrence)) {
+        return $start_date_str;
+    }
+
+    $now = new DateTime();
+    $next_occurrence = new DateTime($start_date_str);
+
+    // If the original start date is still in the future, that's the next one.
+    if ($next_occurrence > $now) {
+        return $next_occurrence->format('Y-m-d H:i:s');
+    }
+
+    // If the original start date has passed, calculate the next one.
+    $interval = ($recurrence === 'weekly') ? '+1 week' : '+1 month';
+    while ($next_occurrence <= $now) {
+        $next_occurrence->modify($interval);
+    }
+
+    return $next_occurrence->format('Y-m-d H:i:s');
+}
 ?>

@@ -559,7 +559,7 @@ include '../includes/header.php';
     // Share functionality
     function shareArticle(platform) {
         const url = window.location.href;
-        const title = "<?php echo addslashes($post['title']); ?> - Grace Fellowship Church";
+        const title = "<?php echo addslashes($post['title']); ?> - Christ performing Christian Centre";
         
         switch(platform) {
             case 'facebook':

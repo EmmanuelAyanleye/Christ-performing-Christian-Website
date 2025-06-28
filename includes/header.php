@@ -152,6 +152,15 @@
         @media (max-width: 768px) {
             .page-header h1 {
                 font-size: 2.5rem !important;
+            }
+
+            .font-display{
+                font-size: 1.3rem !important;
+            }
+
+            .section-title p{
+                font-size: 0.9rem !important;
+            }
         }
 
         @media (max-width: 575.98px) {

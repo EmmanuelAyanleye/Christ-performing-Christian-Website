@@ -8,14 +8,14 @@ if (session_status() == PHP_SESSION_NONE) {
 define('SITE_NAME', 'Christ performing Christian Centre');
 
 // Manually define the base URL to avoid dynamic inconsistency issues
-define('BASE_URL', 'http://localhost/grace-fellowship-website');
+define('BASE_URL', 'http://localhost/christ_performing_christian_centre');
 
 // Define base path for includes if needed
-define('BASE_PATH', $_SERVER['DOCUMENT_ROOT'] . '/grace-fellowship-website');
+define('BASE_PATH', $_SERVER['DOCUMENT_ROOT'] . '/christ_performing_christian_centre');
 
 // Database configuration
 $db_host = 'localhost';
-$db_name = 'grace_fellowship';
+$db_name = 'christ_performing_christian_centre'; // Use your actual database name
 $db_user = 'root';
 $db_pass = '';
 $charset = 'utf8mb4';
@@ -45,3 +45,6 @@ define('SMTP_FROM_NAME', 'Christ performing Christian Centre');
 
 // Include utility functions
 require_once __DIR__ . '/functions.php';
+
+// Include Composer's autoloader for libraries like PHPMailer
+require_once __DIR__ . '/../vendor/autoload.php';

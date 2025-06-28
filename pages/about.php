@@ -333,9 +333,9 @@ include '../includes/header.php';
         <div class="row align-items-center">
             <div class="col-lg-6" data-aos="fade-right">
                 <h2 class="font-display mb-4">Our Story</h2>
-                <p class="mb-4">Christ performing Christian Centre was founded in 1985 with a simple yet powerful vision: to create a place where people could encounter God's love, grow in their faith, and build meaningful relationships with one another.</p>
-                <p class="mb-4">What began as a small gathering of 20 believers in a rented hall has grown into a vibrant community of over 2,000 members, united by our shared commitment to following Jesus Christ and serving our community.</p>
-                <p>Through decades of faithful ministry, we have witnessed countless lives transformed by the power of God's grace, and we continue to be amazed by His faithfulness in our midst.</p>
+                <p class="mb-4">Christ Performing Christian Centre is a vibrant community built on a powerful vision: to be a place where people encounter God's love, grow in their faith, and build meaningful relationships with one another.</p>
+                <p class="mb-4">Under the leadership of Adekunle Emmanuel, our lead pastor, the church has grown into a thriving body of believers, united by a shared commitment to following Jesus Christ and serving our community.</p>
+                <p>Through years of faithful ministry, we have witnessed countless lives transformed by the power of God's grace and continue to stand in awe of His faithfulness in our midst.</p>
             </div>
             <div class="col-lg-6" data-aos="fade-left">
                 <img src="https://images.unsplash.com/photo-1438032005730-c779502df39b?w=600&h=400&fit=crop" 

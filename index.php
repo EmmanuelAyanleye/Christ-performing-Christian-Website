@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/includes/config.php'; // Load configuration and database connection
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 $current_page = 'home'; 
 $contact_message = '';
 $newsletter_message = '';
@@ -28,6 +31,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ':user_agent' => $user_agent
                 ]);
                 $contact_message = '<div class="alert alert-success" role="alert">Thank you for your message! We will get back to you soon.</div>';
+
+                // --- SEND NOTIFICATION EMAIL TO ADMIN ---
+                $mail = new PHPMailer(true);
+                try {
+                    //Server settings
+                    $mail->isSMTP();
+                    $mail->Host       = SMTP_HOST;
+                    $mail->SMTPAuth   = true;
+                    $mail->Username   = SMTP_USER;
+                    $mail->Password   = SMTP_PASS;
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port       = SMTP_PORT;
+
+                    //Recipients
+                    $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
+                    $mail->addAddress(SMTP_USER, 'Site Admin'); // Send to admin email from config
+                    $mail->addReplyTo($email, $name);
+
+                    //Content
+                    $mail->isHTML(true);
+                    $mail->Subject = 'New Contact Form Message: ' . $subject;
+                    $mail->Body    = "<h2>New Message from Website Contact Form</h2><p><strong>Name:</strong> " . htmlspecialchars($name) . "</p><p><strong>Email:</strong> " . htmlspecialchars($email) . "</p><p><strong>Subject:</strong> " . htmlspecialchars($subject) . "</p><hr><p><strong>Message:</strong></p><p>" . nl2br(htmlspecialchars($message_content)) . "</p><hr><p>You can view and reply to this message in the <a href='" . BASE_URL . "/admin/messages.php'>Admin Panel</a>.</p>";
+                    $mail->AltBody = "New message from " . $name . " (" . $email . ").\n\nMessage:\n" . $message_content;
+
+                    $mail->send();
+                } catch (Exception $e) {
+                    // Log email error but don't show to user, as their message was saved.
+                    error_log("Contact form admin notification could not be sent. Mailer Error: {$mail->ErrorInfo}");
+                }
+                // --- END SEND NOTIFICATION EMAIL ---
             } catch (PDOException $e) {
                 error_log('Contact Form Error: ' . $e->getMessage());
                 $contact_message = '<div class="alert alert-danger" role="alert">Sorry, there was an error sending your message. Please try again later.</div>';
@@ -70,10 +103,33 @@ $sermons_stmt->execute();
 $sermons = $sermons_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch upcoming 3 events
-$events_sql = "SELECT * FROM events WHERE start_date > NOW() ORDER BY start_date ASC LIMIT 3";
+$events_sql = "SELECT * FROM events WHERE recurrence != 'none' OR (recurrence = 'none' AND start_date > NOW())";
 $events_stmt = $conn->prepare($events_sql);
 $events_stmt->execute();
-$events = $events_stmt->fetchAll(PDO::FETCH_ASSOC);
+$all_possible_events = $events_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$upcoming_events = [];
+foreach ($all_possible_events as $event) {
+    // Calculate the next occurrence date for the event
+    $next_occurrence_date = calculate_next_occurrence($event['start_date'], $event['recurrence']);
+    
+    // Create DateTime objects for comparison
+    $next_occurrence_datetime = new DateTime($next_occurrence_date);
+    $now = new DateTime();
+
+    // Only include events that are actually upcoming
+    if ($next_occurrence_datetime > $now) {
+        // Add the calculated date to the event array for sorting and display
+        $event['display_date'] = $next_occurrence_date;
+        $upcoming_events[] = $event;
+    }
+}
+
+// Sort events by their calculated next occurrence date
+usort($upcoming_events, fn($a, $b) => strtotime($a['display_date']) <=> strtotime($b['display_date']));
+
+// Get only the next 3 upcoming events to display
+$events = array_slice($upcoming_events, 0, 3);
 
 // Fetch latest 3 blog posts
 $posts_sql = "SELECT p.*, u.full_name as author_name FROM blog_posts p JOIN users u ON p.author_id = u.id WHERE p.status = 'published' ORDER BY p.created_at DESC LIMIT 3";
@@ -607,12 +663,12 @@ $gallery_items = $gallery_stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
                 <div class="card">
                     <img src="<?php echo htmlspecialchars($event['featured_image']); ?>" 
-                         class="card-img-top" alt="<?php echo htmlspecialchars($event['title']); ?>" style="height: 250px; object-fit: cover;">
+                         class="card-img-top" alt="<?php echo htmlspecialchars($event['title']); ?>" style="height: 300px; object-fit: cover;">
                     <div class="card-body">
                         <h5 class="card-title"><?php echo htmlspecialchars($event['title']); ?></h5>
                         <p class="card-text">
-                            <i class="fas fa-calendar me-2 text-primary"></i><?php echo format_date($event['start_date']); ?><br>
-                            <i class="fas fa-clock me-2 text-primary"></i><?php echo date('g:i A', strtotime($event['start_date'])); ?><br>
+                            <i class="fas fa-calendar me-2 text-primary"></i><?php echo format_date($event['display_date']); ?><br>
+                            <i class="fas fa-clock me-2 text-primary"></i><?php echo date('g:i A', strtotime($event['display_date'])); ?><br>
                             <i class="fas fa-map-marker-alt me-2 text-primary"></i><?php echo htmlspecialchars($event['location']); ?>
                         </p>
                         <p class="card-text"><?php echo htmlspecialchars(get_excerpt($event['description'], 100)); ?></p>

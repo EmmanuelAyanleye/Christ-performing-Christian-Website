@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$dbname = 'grace_fellowship'; // Please replace with your actual database name
+$dbname = 'christ_performing_christian_centre'; // Please replace with your actual database name
 $username = 'root';
 $password = ''; // Common for local XAMPP, replace if you have a password
 $charset = 'utf8mb4';

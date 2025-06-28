@@ -117,7 +117,7 @@ include 'partials/sidebar.php';
 ?>
 
 <div class="main-content">
-    <div class="header d-flex justify-content-between align-items-center">
+    <div class="header">
         <h1>Gallery Management</h1>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
             <i class="fas fa-upload"></i> Upload Photos

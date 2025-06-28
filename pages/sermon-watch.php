@@ -25,7 +25,7 @@ if (session_status() == PHP_SESSION_NONE) { session_start(); } // Ensure session
 $userInteractionStatus = $_SESSION['sermon_interactions'][$sermonId] ?? null;
 
 
-$pageTitle = $sermon['title'] . " - Grace Fellowship Church";
+$pageTitle = $sermon['title'] . " - Christ performing Christian Centre";
 $pageDescription = substr(strip_tags($sermon['description']), 0, 160) . "...";
 include '../includes/header.php';
 ?>
@@ -520,8 +520,8 @@ include '../includes/header.php';
     function shareSermon() {
         if (navigator.share) {
             navigator.share({
-                title: '<?php echo addslashes($sermon['title']); ?> - Grace Fellowship Church',
-                text: 'Watch this inspiring sermon from Grace Fellowship Church',
+                title: '<?php echo addslashes($sermon['title']); ?> - Christ performing Christian Centre',
+                text: 'Watch this inspiring sermon from Christ performing Christian Centre',
                 url: window.location.href
             });
         } else {
